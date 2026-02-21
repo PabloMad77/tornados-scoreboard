@@ -9,7 +9,7 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  background: #c2410c; /* Dark Orange */
+  background: #000000; /* BLACK */
   color: white;
   margin: 0;
   padding: 20px;
@@ -36,7 +36,7 @@ input {
 
 .team {
   background: white;
-  color: #c2410c;
+  color: black;
   padding: 20px;
   border-radius: 15px;
   width: 300px;
@@ -58,10 +58,10 @@ button {
 }
 
 .add1 { background: #16a34a; color: white; }
-.add6 { background: #7c2d12; color: white; }
+.add6 { background: #b91c1c; color: white; }
 .sub { background: #dc2626; color: white; }
 .export-btn { background: #facc15; color: black; margin-top: 20px; }
-.reset-btn { background: black; color: white; margin-top: 10px; }
+.reset-btn { background: #333; color: white; margin-top: 10px; }
 
 </style>
 </head>
@@ -96,12 +96,8 @@ button {
 
 <script>
 
-// ---------------- STATE ----------------
-
 let tornadosScore = 0;
 let opponentScore = 0;
-
-// ---------------- LOAD SAVED ----------------
 
 window.onload = function() {
   const saved = JSON.parse(localStorage.getItem("tornadosGame"));
@@ -115,19 +111,14 @@ window.onload = function() {
   }
 };
 
-// ---------------- SAVE ----------------
-
 function saveState() {
   const data = {
     tornados: tornadosScore,
     opponent: opponentScore,
     opponentName: document.getElementById("opponentName").value
   };
-
   localStorage.setItem("tornadosGame", JSON.stringify(data));
 }
-
-// ---------------- UPDATE SCORE ----------------
 
 function updateScore(team, value) {
 
@@ -142,8 +133,6 @@ function updateScore(team, value) {
   saveState();
 }
 
-// ---------------- RESET ----------------
-
 function resetGame() {
   if (confirm("Reset the game?")) {
     tornadosScore = 0;
@@ -155,8 +144,6 @@ function resetGame() {
   }
 }
 
-// ---------------- EXPORT ----------------
-
 function exportScore() {
 
   const canvas = document.createElement("canvas");
@@ -164,8 +151,8 @@ function exportScore() {
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  // Dark Orange Background
-  ctx.fillStyle = "#c2410c";
+  // BLACK Background
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const logo = new Image();
@@ -173,7 +160,6 @@ function exportScore() {
 
   logo.onload = function() {
 
-    // Proportional Logo
     const desiredWidth = 450;
     const scale = desiredWidth / logo.width;
     const newHeight = logo.height * scale;
@@ -183,20 +169,17 @@ function exportScore() {
 
     ctx.drawImage(logo, xPosition, yPosition, desiredWidth, newHeight);
 
-    // Title
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
     ctx.font = "bold 70px Arial";
     ctx.fillText("FINAL SCORE", 540, 650);
 
-    // Scores
     ctx.font = "bold 90px Arial";
     ctx.fillText("TORNADOS " + tornadosScore, 540, 820);
 
     const opponentName = document.getElementById("opponentName").value || "OPPONENT";
     ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 950);
 
-    // Date + Time
     const now = new Date();
     const formattedDate = now.toLocaleDateString();
     const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -204,7 +187,6 @@ function exportScore() {
     ctx.font = "40px Arial";
     ctx.fillText(formattedDate + " • " + formattedTime, 540, 1030);
 
-    // Filename
     const safeDate = now.toISOString().replace(/[:.]/g, "-");
     const link = document.createElement("a");
     link.download = "tornados-final-score-" + safeDate + ".PNG";
