@@ -1,189 +1,222 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
 <title>Tornados Scoreboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   font-family: Arial, sans-serif;
   text-align: center;
+  background: #c2410c; /* Dark Orange */
+  color: white;
   margin: 0;
-  padding: 10px;
+  padding: 20px;
 }
 
 h1 {
   margin-bottom: 10px;
 }
 
+input {
+  padding: 8px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+}
+
+.score-container {
+  display: flex;
+  justify-content: space-around;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+
 .team {
+  background: white;
+  color: #c2410c;
   padding: 20px;
-  border-radius: 14px;
-  color: white;
-  margin-bottom: 15px;
+  border-radius: 15px;
+  width: 300px;
+  margin: 10px;
 }
 
 .score {
   font-size: 70px;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 button {
+  padding: 10px 15px;
   font-size: 18px;
-  padding: 8px 12px;
   margin: 5px;
+  border-radius: 10px;
   border: none;
-  border-radius: 8px;
+  cursor: pointer;
 }
 
-.controls {
-  margin-top: 15px;
-}
+.add1 { background: #16a34a; color: white; }
+.add6 { background: #7c2d12; color: white; }
+.sub { background: #dc2626; color: white; }
+.export-btn { background: #facc15; color: black; margin-top: 20px; }
+.reset-btn { background: black; color: white; margin-top: 10px; }
+
 </style>
 </head>
 
 <body>
 
-<h1 id="title">Tornados vs Opponent</h1>
+<h1>🌪 Tornados Scoreboard</h1>
 
-<!-- TORNADOS (TOP) -->
-<div class="team" id="teamA">
-  <h2>Tornados</h2>
-  <input type="color" id="colorA" value="#0047AB"><br>
-  <div class="score" id="scoreA">0</div>
-  <button id="a6">+6</button>
-  <button id="a1">+1</button>
-  <button id="aMinus">-1</button>
+<div class="score-container">
+
+  <div class="team">
+    <h2>Tornados</h2>
+    <div class="score" id="tornadosScore">0</div>
+    <button class="add1" onclick="updateScore('tornados',1)">+1</button>
+    <button class="add6" onclick="updateScore('tornados',6)">+6</button>
+    <button class="sub" onclick="updateScore('tornados',-1)">-1</button>
+  </div>
+
+  <div class="team">
+    <input type="text" id="opponentName" placeholder="Opponent Name" oninput="saveState()">
+    <div class="score" id="opponentScore">0</div>
+    <button class="add1" onclick="updateScore('opponent',1)">+1</button>
+    <button class="add6" onclick="updateScore('opponent',6)">+6</button>
+    <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
+  </div>
+
 </div>
 
-<!-- OPPONENT (BOTTOM) -->
-<div class="team" id="teamB">
-  <input type="text" id="opponentName" value="Opponent"><br>
-  <input type="color" id="colorB" value="#ff4500"><br>
-  <div class="score" id="scoreB">0</div>
-  <button id="b6">+6</button>
-  <button id="b1">+1</button>
-  <button id="bMinus">-1</button>
-</div>
-
-<div class="controls">
-  <button id="reset">Reset Game</button>
-  <button id="saveImage">📸 Save Final Score</button>
-</div>
+<button class="export-btn" onclick="exportScore()">Export Score Image</button>
+<br>
+<button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
 <script>
-let scoreA = 0;
-let scoreB = 0;
 
-const scoreAEl = document.getElementById("scoreA");
-const scoreBEl = document.getElementById("scoreB");
-const opponentInput = document.getElementById("opponentName");
-const titleEl = document.getElementById("title");
+// ---------------- STATE ----------------
 
-function updateScores() {
-  scoreAEl.textContent = scoreA;
-  scoreBEl.textContent = scoreB;
-  updateTitle();
-  saveData();
+let tornadosScore = 0;
+let opponentScore = 0;
+
+// ---------------- LOAD SAVED ----------------
+
+window.onload = function() {
+  const saved = JSON.parse(localStorage.getItem("tornadosGame"));
+
+  if (saved) {
+    tornadosScore = saved.tornados;
+    opponentScore = saved.opponent;
+    document.getElementById("tornadosScore").innerText = tornadosScore;
+    document.getElementById("opponentScore").innerText = opponentScore;
+    document.getElementById("opponentName").value = saved.opponentName;
+  }
+};
+
+// ---------------- SAVE ----------------
+
+function saveState() {
+  const data = {
+    tornados: tornadosScore,
+    opponent: opponentScore,
+    opponentName: document.getElementById("opponentName").value
+  };
+
+  localStorage.setItem("tornadosGame", JSON.stringify(data));
 }
 
-function updateTitle() {
-  titleEl.textContent = "Tornados vs " + opponentInput.value;
+// ---------------- UPDATE SCORE ----------------
+
+function updateScore(team, value) {
+
+  if (team === "tornados") {
+    tornadosScore = Math.max(0, tornadosScore + value);
+    document.getElementById("tornadosScore").innerText = tornadosScore;
+  } else {
+    opponentScore = Math.max(0, opponentScore + value);
+    document.getElementById("opponentScore").innerText = opponentScore;
+  }
+
+  saveState();
 }
 
-function saveData() {
-  localStorage.setItem("scoreA", scoreA);
-  localStorage.setItem("scoreB", scoreB);
-  localStorage.setItem("opponent", opponentInput.value);
-  localStorage.setItem("colorA", document.getElementById("colorA").value);
-  localStorage.setItem("colorB", document.getElementById("colorB").value);
+// ---------------- RESET ----------------
+
+function resetGame() {
+  if (confirm("Reset the game?")) {
+    tornadosScore = 0;
+    opponentScore = 0;
+    document.getElementById("tornadosScore").innerText = 0;
+    document.getElementById("opponentScore").innerText = 0;
+    document.getElementById("opponentName").value = "";
+    localStorage.removeItem("tornadosGame");
+  }
 }
 
-function loadData() {
-  scoreA = parseInt(localStorage.getItem("scoreA")) || 0;
-  scoreB = parseInt(localStorage.getItem("scoreB")) || 0;
-  opponentInput.value = localStorage.getItem("opponent") || "Opponent";
+// ---------------- EXPORT ----------------
 
-  const colorA = localStorage.getItem("colorA") || "#0047AB";
-  const colorB = localStorage.getItem("colorB") || "#ff4500";
-
-  document.getElementById("colorA").value = colorA;
-  document.getElementById("colorB").value = colorB;
-
-  document.getElementById("teamA").style.backgroundColor = colorA;
-  document.getElementById("teamB").style.backgroundColor = colorB;
-
-  updateScores();
-}
-
-document.getElementById("a6").addEventListener("click", () => { scoreA += 6; updateScores(); });
-document.getElementById("a1").addEventListener("click", () => { scoreA += 1; updateScores(); });
-document.getElementById("aMinus").addEventListener("click", () => { scoreA -= 1; updateScores(); });
-
-document.getElementById("b6").addEventListener("click", () => { scoreB += 6; updateScores(); });
-document.getElementById("b1").addEventListener("click", () => { scoreB += 1; updateScores(); });
-document.getElementById("bMinus").addEventListener("click", () => { scoreB -= 1; updateScores(); });
-
-document.getElementById("reset").addEventListener("click", () => {
-  scoreA = 0;
-  scoreB = 0;
-  opponentInput.value = "Opponent";
-  localStorage.clear();
-  updateScores();
-});
-
-document.getElementById("colorA").addEventListener("input", (e) => {
-  document.getElementById("teamA").style.backgroundColor = e.target.value;
-  saveData();
-});
-
-document.getElementById("colorB").addEventListener("input", (e) => {
-  document.getElementById("teamB").style.backgroundColor = e.target.value;
-  saveData();
-});
-
-opponentInput.addEventListener("input", updateScores);
-
-/* EXPORT IMAGE */
-document.getElementById("saveImage").addEventListener("click", () => {
+function exportScore() {
 
   const canvas = document.createElement("canvas");
-  canvas.width = 900;
-  canvas.height = 500;
+  canvas.width = 1080;
+  canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#ffffff";
+  // Dark Orange Background
+  ctx.fillStyle = "#c2410c";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#000000";
-  ctx.textAlign = "left";
+  const logo = new Image();
+  logo.src = "./logo.PNG";
 
-  ctx.font = "bold 42px Arial";
-  ctx.fillText("FINAL", 80, 80);
+  logo.onload = function() {
 
-  ctx.font = "bold 56px Arial";
-  ctx.fillText("Tornados   " + scoreA, 80, 180);
-  ctx.fillText(opponentInput.value + "   " + scoreB, 80, 260);
+    // Proportional Logo
+    const desiredWidth = 450;
+    const scale = desiredWidth / logo.width;
+    const newHeight = logo.height * scale;
 
-  const today = new Date().toLocaleDateString();
-  ctx.font = "24px Arial";
-  ctx.fillText(today, 80, 340);
+    const xPosition = (canvas.width - desiredWidth) / 2;
+    const yPosition = 120;
 
-  const link = document.createElement("a");
-  link.download =
-    "Tornados_vs_" +
-    opponentInput.value +
-    "_" +
-    scoreA +
-    "-" +
-    scoreB +
-    ".png";
+    ctx.drawImage(logo, xPosition, yPosition, desiredWidth, newHeight);
 
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-});
+    // Title
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.font = "bold 70px Arial";
+    ctx.fillText("FINAL SCORE", 540, 650);
 
-loadData();
+    // Scores
+    ctx.font = "bold 90px Arial";
+    ctx.fillText("TORNADOS " + tornadosScore, 540, 820);
+
+    const opponentName = document.getElementById("opponentName").value || "OPPONENT";
+    ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 950);
+
+    // Date + Time
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    ctx.font = "40px Arial";
+    ctx.fillText(formattedDate + " • " + formattedTime, 540, 1030);
+
+    // Filename
+    const safeDate = now.toISOString().replace(/[:.]/g, "-");
+    const link = document.createElement("a");
+    link.download = "tornados-final-score-" + safeDate + ".PNG";
+    link.href = canvas.toDataURL("image/PNG");
+    link.click();
+  };
+
+  logo.onerror = function() {
+    alert("Logo not found. Make sure logo.png is in the same folder.");
+  };
+}
+
 </script>
 
 </body>
