@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tornados Scoreboard</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 10px;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.team {
+  padding: 20px;
+  border-radius: 14px;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.score {
+  font-size: 70px;
+  margin: 10px 0;
+}
+
+button {
+  font-size: 18px;
+  padding: 8px 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+}
+
+.controls {
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<h1 id="title">Tornados vs Opponent</h1>
+
+<!-- TORNADOS (TOP) -->
+<div class="team" id="teamA">
+  <h2>Tornados</h2>
+  <input type="color" id="colorA" value="#0047AB"><br>
+  <div class="score" id="scoreA">0</div>
+  <button id="a6">+6</button>
+  <button id="a1">+1</button>
+  <button id="aMinus">-1</button>
+</div>
+
+<!-- OPPONENT (BOTTOM) -->
+<div class="team" id="teamB">
+  <input type="text" id="opponentName" value="Opponent"><br>
+  <input type="color" id="colorB" value="#ff4500"><br>
+  <div class="score" id="scoreB">0</div>
+  <button id="b6">+6</button>
+  <button id="b1">+1</button>
+  <button id="bMinus">-1</button>
+</div>
+
+<div class="controls">
+  <button id="reset">Reset Game</button>
+  <button id="saveImage">📸 Save Final Score</button>
+</div>
+
+<script>
+let scoreA = 0;
+let scoreB = 0;
+
+const scoreAEl = document.getElementById("scoreA");
+const scoreBEl = document.getElementById("scoreB");
+const opponentInput = document.getElementById("opponentName");
+const titleEl = document.getElementById("title");
+
+function updateScores() {
+  scoreAEl.textContent = scoreA;
+  scoreBEl.textContent = scoreB;
+  updateTitle();
+  saveData();
+}
+
+function updateTitle() {
+  titleEl.textContent = "Tornados vs " + opponentInput.value;
+}
+
+function saveData() {
+  localStorage.setItem("scoreA", scoreA);
+  localStorage.setItem("scoreB", scoreB);
+  localStorage.setItem("opponent", opponentInput.value);
+  localStorage.setItem("colorA", document.getElementById("colorA").value);
+  localStorage.setItem("colorB", document.getElementById("colorB").value);
+}
+
+function loadData() {
+  scoreA = parseInt(localStorage.getItem("scoreA")) || 0;
+  scoreB = parseInt(localStorage.getItem("scoreB")) || 0;
+  opponentInput.value = localStorage.getItem("opponent") || "Opponent";
+
+  const colorA = localStorage.getItem("colorA") || "#0047AB";
+  const colorB = localStorage.getItem("colorB") || "#ff4500";
+
+  document.getElementById("colorA").value = colorA;
+  document.getElementById("colorB").value = colorB;
+
+  document.getElementById("teamA").style.backgroundColor = colorA;
+  document.getElementById("teamB").style.backgroundColor = colorB;
+
+  updateScores();
+}
+
+document.getElementById("a6").addEventListener("click", () => { scoreA += 6; updateScores(); });
+document.getElementById("a1").addEventListener("click", () => { scoreA += 1; updateScores(); });
+document.getElementById("aMinus").addEventListener("click", () => { scoreA -= 1; updateScores(); });
+
+document.getElementById("b6").addEventListener("click", () => { scoreB += 6; updateScores(); });
+document.getElementById("b1").addEventListener("click", () => { scoreB += 1; updateScores(); });
+document.getElementById("bMinus").addEventListener("click", () => { scoreB -= 1; updateScores(); });
+
+document.getElementById("reset").addEventListener("click", () => {
+  scoreA = 0;
+  scoreB = 0;
+  opponentInput.value = "Opponent";
+  localStorage.clear();
+  updateScores();
+});
+
+document.getElementById("colorA").addEventListener("input", (e) => {
+  document.getElementById("teamA").style.backgroundColor = e.target.value;
+  saveData();
+});
+
+document.getElementById("colorB").addEventListener("input", (e) => {
+  document.getElementById("teamB").style.backgroundColor = e.target.value;
+  saveData();
+});
+
+opponentInput.addEventListener("input", updateScores);
+
+/* EXPORT IMAGE */
+document.getElementById("saveImage").addEventListener("click", () => {
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 900;
+  canvas.height = 500;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#000000";
+  ctx.textAlign = "left";
+
+  ctx.font = "bold 42px Arial";
+  ctx.fillText("FINAL", 80, 80);
+
+  ctx.font = "bold 56px Arial";
+  ctx.fillText("Tornados   " + scoreA, 80, 180);
+  ctx.fillText(opponentInput.value + "   " + scoreB, 80, 260);
+
+  const today = new Date().toLocaleDateString();
+  ctx.font = "24px Arial";
+  ctx.fillText(today, 80, 340);
+
+  const link = document.createElement("a");
+  link.download =
+    "Tornados_vs_" +
+    opponentInput.value +
+    "_" +
+    scoreA +
+    "-" +
+    scoreB +
+    ".png";
+
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+});
+
+loadData();
+</script>
+
+</body>
+</html>
