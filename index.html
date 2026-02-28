@@ -239,71 +239,180 @@ function addStat(type, buttonElement) {
 
 function exportStats() {
 
+  function exportStatsImage() {
+
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
-  canvas.height = 1080;
+  canvas.height = 1350; // Taller for stats
   const ctx = canvas.getContext("2d");
 
+  // BLACK Background
   ctx.fillStyle = "#000000";
-  ctx.fillRect(0, 0, 1080, 1080);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const logo = new Image();
   logo.src = "./logo.PNG";
 
-  logo.onload = function() {
+  logo.onload = function () {
 
-    ctx.drawImage(logo, 440, 40, 200, 200);
+    /* =========================
+       LOGO
+    ========================== */
+
+    const desiredWidth = 250; // smaller logo for stats
+    const scale = desiredWidth / logo.width;
+    const newHeight = logo.height * scale;
+
+    const xPosition = (canvas.width - desiredWidth) / 2;
+    const logoY = 80;
+
+    ctx.drawImage(logo, xPosition, logoY, desiredWidth, newHeight);
+
+    /* =========================
+       HEADER STACK (Dynamic spacing)
+    ========================== */
+
+    const titleY = logoY + newHeight + 70;
 
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
-    // Main Title
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.font = "bold 70px Arial";
-    ctx.fillText("TORNADOS GAME STATS", 540, 120);
+    // MAIN TITLE
+    ctx.font = "bold 65px Arial";
+    ctx.fillText("TORNADOS GAME STATS", 540, titleY);
 
-    // VS Opponent Line
-    const opponentName = document.getElementById("opponentName").value || "OPPONENT";
-    ctx.font = "bold 50px Arial";
-    ctx.fillText("vs " + opponentName.toUpperCase(), 540, 180);
+    // VS OPPONENT
+    const opponentName =
+      document.getElementById("opponentName").value || "OPPONENT";
+
+    ctx.font = "bold 48px Arial";
+    ctx.fillText("vs " + opponentName.toUpperCase(), 540, titleY + 60);
+
+    // CATEGORY
+    const categoryText =
+      document.getElementById("categoryInput")?.value || "";
 
     ctx.font = "40px Arial";
-    ctx.fillText(document.getElementById("categoryName").value || "", 540, 340);
-    ctx.fillText(document.getElementById("jornadaName").value || "", 540, 390);
+    ctx.fillText(categoryText.toUpperCase(), 540, titleY + 120);
 
-    const startY = 450;
-    const rowHeight = 65;
+    // JORNADA
+    const jornadaText =
+      document.getElementById("jornadaInput")?.value || "";
 
-    const colPlayer = 150;
-    const colTD = 520;
-    const colINT = 610;
-    const colSACK = 700;
-    const colXP = 790;
-    const colTKL = 880;
-    const colSAF = 960;
+    ctx.fillText(jornadaText.toUpperCase(), 540, titleY + 165);
 
-    ctx.font = "bold 32px Arial";
-    ctx.textAlign = "left";
-    ctx.fillText("PLAYER", colPlayer, startY);
+    /* =========================
+       TABLE START POSITION
+    ========================== */
 
-    ctx.textAlign = "center";
-    ctx.fillText("TD", colTD, startY);
-    ctx.fillText("INT", colINT, startY);
-    ctx.fillText("SACK", colSACK, startY);
-    ctx.fillText("XP", colXP, startY);
-    ctx.fillText("TKL", colTKL, startY);
-    ctx.fillText("SAF", colSAF, startY);
+    let startY = titleY + 230;
 
-    ctx.beginPath();
-    ctx.moveTo(120, startY + 20);
-    ctx.lineTo(1000, startY + 20);
+    const rowHeight = 60;
+    const colWidth = 130;
+
+    const columns = ["PLAYER", "TD", "INT", "SACK", "XP", "TKL", "SAF"];
+
+    const tableWidth = colWidth * columns.length;
+    const startX = (canvas.width - tableWidth) / 2;
+
+    /* =========================
+       DRAW HEADER ROW
+    ========================== */
+
     ctx.strokeStyle = "white";
     ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.font = "bold 32px Arial";
 
-    let y = startY + rowHeight;
-    let rowIndex = 0;
+    columns.forEach((col, i) => {
+      ctx.strokeRect(startX + i * colWidth, startY, colWidth, rowHeight);
+      ctx.fillText(
+        col,
+        startX + i * colWidth + colWidth / 2,
+        startY + 40
+      );
+    });
+
+    startY += rowHeight;
+
+    /* =========================
+       DRAW PLAYER ROWS
+    ========================== */
+
+    ctx.font = "30px Arial";
+
+    const players = Object.keys(stats);
+
+    players.forEach((player, index) => {
+
+      const y = startY + index * rowHeight;
+
+      // Alternating row color
+      ctx.fillStyle = index % 2 === 0 ? "#111111" : "#1a1a1a";
+      ctx.fillRect(startX, y, tableWidth, rowHeight);
+
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 1;
+
+      const playerStats = stats[player];
+
+      const values = [
+        player.toUpperCase(),
+        playerStats.TD || "-",
+        playerStats.INT || "-",
+        playerStats.SACK || "-",
+        playerStats.XP || "-",
+        playerStats.TKL || "-",
+        playerStats.SAF || "-"
+      ];
+
+      values.forEach((val, i) => {
+        ctx.strokeRect(startX + i * colWidth, y, colWidth, rowHeight);
+
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+
+        ctx.fillText(
+          val,
+          startX + i * colWidth + colWidth / 2,
+          y + 40
+        );
+      });
+    });
+
+    /* =========================
+       FOOTER DATE
+    ========================== */
+
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    ctx.font = "28px Arial";
+    ctx.fillText(
+      formattedDate + " • " + formattedTime,
+      540,
+      canvas.height - 40
+    );
+
+    /* =========================
+       EXPORT FILE
+    ========================== */
+
+    const safeDate = now.toISOString().replace(/[:.]/g, "-");
+
+    const link = document.createElement("a");
+    link.download = "tornados-game-stats-" + safeDate + ".PNG";
+    link.href = canvas.toDataURL("image/PNG");
+    link.click();
+  };
+
+  logo.onerror = function () {
+    alert("Logo not found. Make sure logo.PNG is in the same folder.");
+  };
+}
 
     function drawStat(value, x, y) {
       if (value === 0) {
