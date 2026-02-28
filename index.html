@@ -257,8 +257,16 @@ function exportStats() {
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
-    ctx.font = "bold 60px Arial";
-    ctx.fillText("TORNADOS GAME STATS", 540, 280);
+    // Main Title
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.font = "bold 70px Arial";
+    ctx.fillText("TORNADOS GAME STATS", 540, 120);
+
+    // VS Opponent Line
+    const opponentName = document.getElementById("opponentName").value || "OPPONENT";
+    ctx.font = "bold 50px Arial";
+    ctx.fillText("vs " + opponentName.toUpperCase(), 540, 180);
 
     ctx.font = "40px Arial";
     ctx.fillText(document.getElementById("categoryName").value || "", 540, 340);
