@@ -68,6 +68,26 @@ button {
   padding: 20px;
   border-top: 2px solid #444;
 }
+/* Button press animation */
+button {
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+button:active {
+  transform: scale(0.92);
+}
+
+/* Flash effect */
+.flash {
+  animation: flashEffect 0.25s ease;
+}
+
+@keyframes flashEffect {
+  0% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+  50% { box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+  100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+}
+  
 </style>
 </head>
 
@@ -116,12 +136,12 @@ button {
 
   <br><br>
 
-  <button onclick="addStat('TD')">+TD</button>
-  <button onclick="addStat('INT')">+INT</button>
-  <button onclick="addStat('SACK')">+SACK</button>
-  <button onclick="addStat('XP')">+XP</button>
-  <button onclick="addStat('TKL')">+TKL</button>
-  <button onclick="addStat('SAF')">+SAFETY</button>
+  <button onclick="addStat('TD', this)">+TD</button>
+<button onclick="addStat('INT', this)">+INT</button>
+<button onclick="addStat('SACK', this)">+SACK</button>
+<button onclick="addStat('XP', this)">+XP</button>
+<button onclick="addStat('TKL', this)">+TKL</button>
+<button onclick="addStat('SAF', this)">+SAFETY</button>
 
 </div>
 
@@ -195,11 +215,22 @@ function updatePlayerDropdown() {
   }
 }
 
-function addStat(type) {
+function addStat(type, buttonElement) {
+
   const player = document.getElementById("playerSelect").value;
   if (!player) return;
+
   stats[player][type]++;
   saveState();
+
+  // Visual feedback
+  buttonElement.classList.add("flash");
+  setTimeout(() => buttonElement.classList.remove("flash"), 250);
+
+  // Mobile vibration (if supported)
+  if (navigator.vibrate) {
+    navigator.vibrate(40);
+  }
 }
 
 /* =======================
