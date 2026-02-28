@@ -202,6 +202,10 @@ function addStat(type) {
   saveState();
 }
 
+/* =======================
+   STATS EXPORT (UPGRADED)
+======================= */
+
 function exportStats() {
 
   const canvas = document.createElement("canvas");
@@ -209,7 +213,6 @@ function exportStats() {
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  // Background
   ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, 1080, 1080);
 
@@ -218,7 +221,6 @@ function exportStats() {
 
   logo.onload = function() {
 
-    // Small Logo
     ctx.drawImage(logo, 440, 40, 200, 200);
 
     ctx.fillStyle = "white";
@@ -234,7 +236,6 @@ function exportStats() {
     const startY = 450;
     const rowHeight = 65;
 
-    // Column X positions
     const colPlayer = 150;
     const colTD = 520;
     const colINT = 610;
@@ -243,7 +244,6 @@ function exportStats() {
     const colTKL = 880;
     const colSAF = 960;
 
-    // Header
     ctx.font = "bold 32px Arial";
     ctx.textAlign = "left";
     ctx.fillText("PLAYER", colPlayer, startY);
@@ -256,7 +256,6 @@ function exportStats() {
     ctx.fillText("TKL", colTKL, startY);
     ctx.fillText("SAF", colSAF, startY);
 
-    // Header underline
     ctx.beginPath();
     ctx.moveTo(120, startY + 20);
     ctx.lineTo(1000, startY + 20);
@@ -267,32 +266,38 @@ function exportStats() {
     let y = startY + rowHeight;
     let rowIndex = 0;
 
+    function drawStat(value, x, y) {
+      if (value === 0) {
+        ctx.fillStyle = "#777777";
+        ctx.fillText("–", x, y);
+      } else {
+        ctx.fillStyle = "white";
+        ctx.fillText(value, x, y);
+      }
+    }
+
     ctx.font = "30px Arial";
 
     for (let player in stats) {
 
       const s = stats[player];
 
-      // Alternating row background
       if (rowIndex % 2 === 0) {
         ctx.fillStyle = "#1a1a1a";
         ctx.fillRect(100, y - 40, 900, rowHeight);
       }
 
       ctx.fillStyle = "white";
-
-      // Player name (left aligned)
       ctx.textAlign = "left";
       ctx.fillText(player, colPlayer, y);
 
-      // Stats (centered)
       ctx.textAlign = "center";
-      ctx.fillText(s.TD, colTD, y);
-      ctx.fillText(s.INT, colINT, y);
-      ctx.fillText(s.SACK, colSACK, y);
-      ctx.fillText(s.XP, colXP, y);
-      ctx.fillText(s.TKL, colTKL, y);
-      ctx.fillText(s.SAF, colSAF, y);
+      drawStat(s.TD, colTD, y);
+      drawStat(s.INT, colINT, y);
+      drawStat(s.SACK, colSACK, y);
+      drawStat(s.XP, colXP, y);
+      drawStat(s.TKL, colTKL, y);
+      drawStat(s.SAF, colSAF, y);
 
       y += rowHeight;
       rowIndex++;
