@@ -209,6 +209,7 @@ function exportStats() {
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
+  // Background
   ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, 1080, 1080);
 
@@ -217,6 +218,7 @@ function exportStats() {
 
   logo.onload = function() {
 
+    // Small Logo
     ctx.drawImage(logo, 440, 40, 200, 200);
 
     ctx.fillStyle = "white";
@@ -230,48 +232,70 @@ function exportStats() {
     ctx.fillText(document.getElementById("jornadaName").value || "", 540, 390);
 
     const startY = 450;
-    const rowHeight = 60;
+    const rowHeight = 65;
 
-    const columns = [100, 400, 500, 600, 700, 800, 900];
+    // Column X positions
+    const colPlayer = 150;
+    const colTD = 520;
+    const colINT = 610;
+    const colSACK = 700;
+    const colXP = 790;
+    const colTKL = 880;
+    const colSAF = 960;
 
+    // Header
     ctx.font = "bold 32px Arial";
     ctx.textAlign = "left";
+    ctx.fillText("PLAYER", colPlayer, startY);
 
-    ctx.fillText("PLAYER", columns[0], startY);
-    ctx.fillText("TD", columns[1], startY);
-    ctx.fillText("INT", columns[2], startY);
-    ctx.fillText("SACK", columns[3], startY);
-    ctx.fillText("XP", columns[4], startY);
-    ctx.fillText("TKL", columns[5], startY);
-    ctx.fillText("SAF", columns[6], startY);
+    ctx.textAlign = "center";
+    ctx.fillText("TD", colTD, startY);
+    ctx.fillText("INT", colINT, startY);
+    ctx.fillText("SACK", colSACK, startY);
+    ctx.fillText("XP", colXP, startY);
+    ctx.fillText("TKL", colTKL, startY);
+    ctx.fillText("SAF", colSAF, startY);
 
+    // Header underline
     ctx.beginPath();
-    ctx.moveTo(80, startY + 15);
-    ctx.lineTo(1000, startY + 15);
+    ctx.moveTo(120, startY + 20);
+    ctx.lineTo(1000, startY + 20);
     ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
     ctx.stroke();
 
     let y = startY + rowHeight;
+    let rowIndex = 0;
 
     ctx.font = "30px Arial";
 
     for (let player in stats) {
+
       const s = stats[player];
 
-      ctx.fillText(player, columns[0], y);
-      ctx.fillText(s.TD, columns[1], y);
-      ctx.fillText(s.INT, columns[2], y);
-      ctx.fillText(s.SACK, columns[3], y);
-      ctx.fillText(s.XP, columns[4], y);
-      ctx.fillText(s.TKL, columns[5], y);
-      ctx.fillText(s.SAF, columns[6], y);
+      // Alternating row background
+      if (rowIndex % 2 === 0) {
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(100, y - 40, 900, rowHeight);
+      }
 
-      ctx.beginPath();
-      ctx.moveTo(80, y + 15);
-      ctx.lineTo(1000, y + 15);
-      ctx.stroke();
+      ctx.fillStyle = "white";
+
+      // Player name (left aligned)
+      ctx.textAlign = "left";
+      ctx.fillText(player, colPlayer, y);
+
+      // Stats (centered)
+      ctx.textAlign = "center";
+      ctx.fillText(s.TD, colTD, y);
+      ctx.fillText(s.INT, colINT, y);
+      ctx.fillText(s.SACK, colSACK, y);
+      ctx.fillText(s.XP, colXP, y);
+      ctx.fillText(s.TKL, colTKL, y);
+      ctx.fillText(s.SAF, colSAF, y);
 
       y += rowHeight;
+      rowIndex++;
     }
 
     const now = new Date();
