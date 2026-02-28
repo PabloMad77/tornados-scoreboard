@@ -139,6 +139,8 @@ let tornadosScore=0;
 let opponentScore=0;
 let stats={};
 
+/* ================= SCORE LOGIC ================= */
+
 function updateScore(team,value,btn){
   if(team==="tornados"){
     tornadosScore=Math.max(0,tornadosScore+value);
@@ -166,6 +168,8 @@ function resetGame(){
   }
 }
 
+/* ================= PLAYER STATS ================= */
+
 function addPlayer(){
   const name=document.getElementById("playerName").value.trim();
   if(!name||stats[name]) return;
@@ -191,7 +195,39 @@ function addStat(type,btn){
   if(navigator.vibrate) navigator.vibrate(40);
 }
 
+/* ================= SHARE / DOWNLOAD LOGIC ================= */
+
+async function shareCanvas(canvas, fileName){
+
+  const blob = await new Promise(resolve => 
+    canvas.toBlob(resolve, "image/png")
+  );
+
+  const file = new File([blob], fileName, { type: "image/png" });
+
+  // Modern mobile share sheet
+  if(navigator.canShare && navigator.canShare({ files: [file] })){
+    try{
+      await navigator.share({
+        files: [file],
+        title: fileName
+      });
+    }catch(err){
+      console.log("Share cancelled");
+    }
+  } else {
+    // Fallback download
+    const link=document.createElement("a");
+    link.download=fileName;
+    link.href=URL.createObjectURL(blob);
+    link.click();
+  }
+}
+
+/* ================= FINAL SCORE EXPORT ================= */
+
 function exportScore(){
+
   const canvas=document.createElement("canvas");
   canvas.width=1080;
   canvas.height=1080;
@@ -204,6 +240,7 @@ function exportScore(){
   logo.src="./logo.PNG";
 
   logo.onload=function(){
+
     const w=450;
     const scale=w/logo.width;
     const h=logo.height*scale;
@@ -221,14 +258,14 @@ function exportScore(){
     const opp=document.getElementById("opponentName").value||"OPPONENT";
     ctx.fillText(opp.toUpperCase()+" "+opponentScore,540,950);
 
-    const link=document.createElement("a");
-    link.download="tornados-final-score.PNG";
-    link.href=canvas.toDataURL("image/PNG");
-    link.click();
+    shareCanvas(canvas,"tornados-final-score.PNG");
   };
 }
 
+/* ================= STATS EXPORT ================= */
+
 function exportStatsImage(){
+
   const canvas=document.createElement("canvas");
   canvas.width=1080;
   canvas.height=1350;
@@ -325,17 +362,13 @@ function exportStatsImage(){
           x=startX+playerColWidth+((i-1)*statColWidth);
           width=statColWidth;
         }
-        ctx.strokeStyle="white";
         ctx.strokeRect(x,y,width,rowHeight);
         ctx.fillStyle="white";
         ctx.fillText(val,x+width/2,y+40);
       });
     });
 
-    const link=document.createElement("a");
-    link.download="tornados-game-stats.PNG";
-    link.href=canvas.toDataURL("image/PNG");
-    link.click();
+    shareCanvas(canvas,"tornados-game-stats.PNG");
   };
 }
 
