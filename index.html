@@ -1,231 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Tornados Scoreboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body{
-  font-family:Arial,sans-serif;
-  text-align:center;
-  background:#000;
-  color:white;
-  margin:0;
-  padding:20px;
-}
-
-h1{margin-bottom:10px;}
-
-input,select{
-  padding:8px;
-  font-size:18px;
-  border-radius:8px;
-  border:none;
-  text-align:center;
-  margin:5px;
-}
-
-.score-container{
-  display:flex;
-  justify-content:space-around;
-  margin:30px 0;
-  flex-wrap:wrap;
-}
-
-.team{
-  background:white;
-  color:black;
-  padding:20px;
-  border-radius:15px;
-  width:300px;
-  margin:10px;
-}
-
-.score{
-  font-size:70px;
-  margin:20px 0;
-}
-
-button{
-  padding:10px 15px;
-  font-size:18px;
-  margin:5px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  transition:transform 0.08s ease, box-shadow 0.08s ease;
-}
-
-button:active{transform:scale(0.92);}
-
-.flash{animation:flashEffect 0.25s ease;}
-
-@keyframes flashEffect{
-  0%{box-shadow:0 0 0 rgba(255,255,255,0);}
-  50%{box-shadow:0 0 20px rgba(255,255,255,0.6);}
-  100%{box-shadow:0 0 0 rgba(255,255,255,0);}
-}
-
-.add1{background:#16a34a;color:white;}
-.add6{background:#b91c1c;color:white;}
-.sub{background:#dc2626;color:white;}
-.export-btn{background:#facc15;color:black;margin-top:20px;}
-.reset-btn{background:#333;color:white;margin-top:10px;}
-
-.stats-box{
-  margin-top:40px;
-  padding:20px;
-  border:1px solid #444;
-  border-radius:12px;
-}
-</style>
-</head>
-
-<body>
-
-<h1>Tornados Scoreboard</h1>
-
-<input type="text" id="categoryInput" placeholder="Category (U10, U14...)">
-<input type="text" id="jornadaInput" placeholder="Jornada / Game Week">
-
-<div class="score-container">
-
-  <div class="team">
-    <h2>Tornados</h2>
-    <div class="score" id="tornadosScore">0</div>
-    <button class="add1" onclick="updateScore('tornados',1,this)">+1</button>
-    <button class="add6" onclick="updateScore('tornados',6,this)">+6</button>
-    <button class="sub" onclick="updateScore('tornados',-1,this)">-1</button>
-  </div>
-
-  <div class="team">
-    <input type="text" id="opponentName" placeholder="Opponent Name">
-    <div class="score" id="opponentScore">0</div>
-    <button class="add1" onclick="updateScore('opponent',1,this)">+1</button>
-    <button class="add6" onclick="updateScore('opponent',6,this)">+6</button>
-    <button class="sub" onclick="updateScore('opponent',-1,this)">-1</button>
-  </div>
-
-</div>
-
-<button class="export-btn" onclick="exportScore()">Export Final Score</button>
-<button class="export-btn" onclick="exportStatsImage()">Export Game Stats</button>
-<br>
-<button class="reset-btn" onclick="resetGame()">Reset Game</button>
-
-<div class="stats-box">
-  <h2>Player Stats</h2>
-
-  <input type="text" id="playerName" placeholder="Player Name">
-  <button onclick="addPlayer()">Add Player</button>
-  <br><br>
-
-  <select id="playerSelect"></select>
-
-  <div>
-    <button onclick="addStat('TD',this)">+TD</button>
-    <button onclick="addStat('INT',this)">+INT</button>
-    <button onclick="addStat('SACK',this)">+SACK</button>
-    <button onclick="addStat('XP',this)">+XP</button>
-    <button onclick="addStat('TKL',this)">+TKL</button>
-    <button onclick="addStat('SAF',this)">+SAFETY</button>
-  </div>
-</div>
-
-<script>
-
-let tornadosScore=0;
-let opponentScore=0;
-let stats={};
-
-/* ================= SCORE LOGIC ================= */
-
-function updateScore(team,value,btn){
-  if(team==="tornados"){
-    tornadosScore=Math.max(0,tornadosScore+value);
-    document.getElementById("tornadosScore").innerText=tornadosScore;
-  }else{
-    opponentScore=Math.max(0,opponentScore+value);
-    document.getElementById("opponentScore").innerText=opponentScore;
-  }
-
-  if(btn){
-    btn.classList.add("flash");
-    setTimeout(()=>btn.classList.remove("flash"),250);
-    if(navigator.vibrate) navigator.vibrate(40);
-  }
-}
-
-function resetGame(){
-  if(confirm("Reset the game?")){
-    tornadosScore=0;
-    opponentScore=0;
-    stats={};
-    document.getElementById("tornadosScore").innerText=0;
-    document.getElementById("opponentScore").innerText=0;
-    document.getElementById("playerSelect").innerHTML="";
-  }
-}
-
-/* ================= PLAYER STATS ================= */
-
-function addPlayer(){
-  const name=document.getElementById("playerName").value.trim();
-  if(!name||stats[name]) return;
-
-  stats[name]={TD:0,INT:0,SACK:0,XP:0,TKL:0,SAF:0};
-
-  const option=document.createElement("option");
-  option.value=name;
-  option.text=name;
-  document.getElementById("playerSelect").appendChild(option);
-
-  document.getElementById("playerName").value="";
-}
-
-function addStat(type,btn){
-  const player=document.getElementById("playerSelect").value;
-  if(!player) return;
-
-  stats[player][type]++;
-
-  btn.classList.add("flash");
-  setTimeout(()=>btn.classList.remove("flash"),250);
-  if(navigator.vibrate) navigator.vibrate(40);
-}
-
-/* ================= SHARE / DOWNLOAD LOGIC ================= */
-
-async function shareCanvas(canvas, fileName){
-
-  const blob = await new Promise(resolve => 
-    canvas.toBlob(resolve, "image/png")
-  );
-
-  const file = new File([blob], fileName, { type: "image/png" });
-
-  // Modern mobile share sheet
-  if(navigator.canShare && navigator.canShare({ files: [file] })){
-    try{
-      await navigator.share({
-        files: [file],
-        title: fileName
-      });
-    }catch(err){
-      console.log("Share cancelled");
-    }
-  } else {
-    // Fallback download
-    const link=document.createElement("a");
-    link.download=fileName;
-    link.href=URL.createObjectURL(blob);
-    link.click();
-  }
-}
-
-/* ================= FINAL SCORE EXPORT ================= */
-
 function exportScore(){
 
   const canvas=document.createElement("canvas");
@@ -233,145 +5,117 @@ function exportScore(){
   canvas.height=1080;
   const ctx=canvas.getContext("2d");
 
+  // Background
   ctx.fillStyle="#000";
   ctx.fillRect(0,0,1080,1080);
 
   const logo=new Image();
-  logo.src="./logo.PNG";
+  logo.src="./logo.PNG?" + new Date().getTime();
+
+  const now = new Date();
+
+  const formattedDate = now.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+
+  const formattedTime = now.toLocaleTimeString([], { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
 
   logo.onload=function(){
 
-    const w=450;
+    /* ========= LOGO ========= */
+
+    const w=420;
     const scale=w/logo.width;
     const h=logo.height*scale;
 
-    ctx.drawImage(logo,(1080-w)/2,120,w,h);
+    ctx.drawImage(logo,(1080-w)/2,100,w,h);
 
     ctx.fillStyle="white";
     ctx.textAlign="center";
-    ctx.font="bold 70px Arial";
-    ctx.fillText("FINAL SCORE",540,650);
 
-    ctx.font="bold 90px Arial";
-    ctx.fillText("TORNADOS "+tornadosScore,540,820);
+    /* ========= TITLE ========= */
+
+    ctx.font="bold 75px Arial";
+    ctx.shadowColor="#00ffff";
+    ctx.shadowBlur=25;   // 🔥 GLOW
+    ctx.fillText("FINAL SCORE",540,600);
+
+    ctx.shadowBlur=0;
+
+    /* ========= CATEGORY + JORNADA ========= */
+
+    const cat=document.getElementById("categoryInput").value||"";
+    const jorn=document.getElementById("jornadaInput").value||"";
+
+    let metaLine="";
+    if(cat && jorn){
+      metaLine = cat.toUpperCase() + " • " + jorn;
+    }else if(cat){
+      metaLine = cat.toUpperCase();
+    }else if(jorn){
+      metaLine = jorn;
+    }
+
+    ctx.font="42px Arial";
+    ctx.fillText(metaLine,540,660);
+
+    /* ========= DATE ========= */
+
+    ctx.font="32px Arial";
+    ctx.fillStyle="#cccccc";
+    ctx.fillText(formattedDate + "  |  " + formattedTime,540,705);
+
+    ctx.fillStyle="white";
+
+    /* ========= DIVIDER LINE ========= */
+
+    ctx.strokeStyle="rgba(255,255,255,0.3)";
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.moveTo(200,750);
+    ctx.lineTo(880,750);
+    ctx.stroke();
+
+    /* ========= SCORES ========= */
+
+    ctx.font="bold 95px Arial";
+
+    // Glow for Tornados score
+    ctx.shadowColor="#00ffff";
+    ctx.shadowBlur=35;
+
+    ctx.fillText("TORNADOS " + tornadosScore,540,870);
+
+    ctx.shadowBlur=0;
 
     const opp=document.getElementById("opponentName").value||"OPPONENT";
-    ctx.fillText(opp.toUpperCase()+" "+opponentScore,540,950);
+    ctx.fillText(opp.toUpperCase()+" "+opponentScore,540,980);
+
+    /* ========= WIN / LOSS BADGE ========= */
+
+    let resultText="";
+    if(tornadosScore > opponentScore){
+      resultText="WIN";
+      ctx.fillStyle="#16a34a";
+    }else if(tornadosScore < opponentScore){
+      resultText="LOSS";
+      ctx.fillStyle="#dc2626";
+    }else{
+      resultText="TIE";
+      ctx.fillStyle="#facc15";
+    }
+
+    ctx.font="bold 60px Arial";
+    ctx.shadowColor=ctx.fillStyle;
+    ctx.shadowBlur=25;
+    ctx.fillText(resultText,540,1035);
+    ctx.shadowBlur=0;
 
     shareCanvas(canvas,"tornados-final-score.PNG");
   };
 }
-
-/* ================= STATS EXPORT ================= */
-
-function exportStatsImage(){
-
-  const canvas=document.createElement("canvas");
-  canvas.width=1080;
-  canvas.height=1350;
-  const ctx=canvas.getContext("2d");
-
-  ctx.fillStyle="#000";
-  ctx.fillRect(0,0,1080,1350);
-
-  const logo=new Image();
-  logo.src="./logo.PNG";
-
-  logo.onload=function(){
-
-    const logoWidth=250;
-    const scale=logoWidth/logo.width;
-    const logoHeight=logo.height*scale;
-    const logoY=80;
-
-    ctx.drawImage(logo,(1080-logoWidth)/2,logoY,logoWidth,logoHeight);
-
-    const titleY=logoY+logoHeight+70;
-
-    ctx.fillStyle="white";
-    ctx.textAlign="center";
-
-    ctx.font="bold 65px Arial";
-    ctx.fillText("TORNADOS GAME STATS",540,titleY);
-
-    const opp=document.getElementById("opponentName").value||"OPPONENT";
-    ctx.font="bold 48px Arial";
-    ctx.fillText("vs "+opp.toUpperCase(),540,titleY+60);
-
-    const cat=document.getElementById("categoryInput").value||"";
-    const jorn=document.getElementById("jornadaInput").value||"";
-    ctx.font="40px Arial";
-    ctx.fillText(cat.toUpperCase(),540,titleY+120);
-    ctx.fillText(jorn.toUpperCase(),540,titleY+165);
-
-    let startY=titleY+230;
-    const rowHeight=60;
-    const statColWidth=120;
-    const statColumns=["TD","INT","SACK","XP","TKL","SAF"];
-    const players=Object.keys(stats);
-
-    ctx.font="bold 32px Arial";
-
-    let longest=ctx.measureText("PLAYER").width;
-    players.forEach(p=>{
-      const w=ctx.measureText(p.toUpperCase()).width;
-      if(w>longest) longest=w;
-    });
-
-    const playerColWidth=longest+40;
-    const totalWidth=playerColWidth+(statColumns.length*statColWidth);
-    const startX=(1080-totalWidth)/2;
-
-    ctx.strokeStyle="white";
-
-    ctx.strokeRect(startX,startY,playerColWidth,rowHeight);
-    ctx.fillText("PLAYER",startX+playerColWidth/2,startY+40);
-
-    statColumns.forEach((col,i)=>{
-      const x=startX+playerColWidth+(i*statColWidth);
-      ctx.strokeRect(x,startY,statColWidth,rowHeight);
-      ctx.fillText(col,x+statColWidth/2,startY+40);
-    });
-
-    startY+=rowHeight;
-    ctx.font="30px Arial";
-
-    players.forEach((player,index)=>{
-      const y=startY+(index*rowHeight);
-      ctx.fillStyle=index%2===0?"#111":"#1a1a1a";
-      ctx.fillRect(startX,y,totalWidth,rowHeight);
-
-      const s=stats[player];
-
-      const values=[
-        player.toUpperCase(),
-        s.TD||"-",
-        s.INT||"-",
-        s.SACK||"-",
-        s.XP||"-",
-        s.TKL||"-",
-        s.SAF||"-"
-      ];
-
-      values.forEach((val,i)=>{
-        let x,width;
-        if(i===0){
-          x=startX;
-          width=playerColWidth;
-        }else{
-          x=startX+playerColWidth+((i-1)*statColWidth);
-          width=statColWidth;
-        }
-        ctx.strokeRect(x,y,width,rowHeight);
-        ctx.fillStyle="white";
-        ctx.fillText(val,x+width/2,y+40);
-      });
-    });
-
-    shareCanvas(canvas,"tornados-game-stats.PNG");
-  };
-}
-
-</script>
-</body>
-</html>
