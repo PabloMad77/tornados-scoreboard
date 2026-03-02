@@ -154,6 +154,7 @@ button:hover{opacity:0.85;}
   </div>
 </div>
 
+<button class="export-btn" onclick="exportFinalScore()">Export Final Score</button>
 <button class="export-btn" onclick="exportStatsImage()">Export Game Stats</button>
 <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
@@ -252,7 +253,64 @@ function closeModal(){
   document.getElementById("playerModal").style.display="none";
 }
 
-/* EXPORT (UPDATED LOGIC ONLY) */
+/* FINAL SCORE EXPORT (UPGRADED) */
+function exportFinalScore(){
+
+  const canvas=document.createElement("canvas");
+  const ctx=canvas.getContext("2d");
+
+  canvas.width=1080;
+  canvas.height=900;
+
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  const logo=new Image();
+  logo.src="logo.PNG";
+
+  logo.onload=function(){
+
+    ctx.drawImage(logo,490,60,100,100);
+
+    ctx.fillStyle="white";
+    ctx.font="bold 60px Arial";
+    ctx.textAlign="center";
+    ctx.fillText("FINAL SCORE",540,220);
+
+    const category=document.getElementById("categoryInput").value||"";
+    const jornada=document.getElementById("jornadaInput").value||"";
+    const meta=(category && jornada)? category+" • Jornada "+jornada:"";
+
+    ctx.fillStyle="#00ffff";
+    ctx.font="30px Arial";
+    ctx.fillText(meta,540,270);
+
+    const now=new Date();
+    const date=now.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+    const time=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+    ctx.fillStyle="#ccc";
+    ctx.font="26px Arial";
+    ctx.fillText(date+" | "+time,540,310);
+
+    ctx.strokeStyle="rgba(255,255,255,0.3)";
+    ctx.beginPath();
+    ctx.moveTo(150,340);
+    ctx.lineTo(930,340);
+    ctx.stroke();
+
+    ctx.fillStyle="white";
+    ctx.font="bold 120px Arial";
+    ctx.fillText(tornadosScore+" - "+opponentScore,540,520);
+
+    const link=document.createElement("a");
+    link.download="tornados_final_score.png";
+    link.href=canvas.toDataURL("image/png");
+    link.click();
+  };
+}
+
+/* STATS EXPORT */
 function exportStatsImage(){
 
   const activePlayers = Object.keys(stats).filter(player =>
