@@ -3,337 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <title>Tornados Scoreboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
 body{
-  font-family:Arial,sans-serif;
-  text-align:center;
-  background:#000;
-  color:white;
-  margin:0;
-  padding:20px;
+    font-family: Arial, sans-serif;
+    background:#0c1a2b;
+    color:white;
+    text-align:center;
 }
 
-h1{margin-bottom:10px;}
+h1{
+    color:#00c3ff;
+    text-shadow:0 0 12px #00c3ff;
+}
 
 input{
-  padding:8px;
-  font-size:18px;
-  border-radius:8px;
-  border:none;
-  text-align:center;
-  margin:5px;
-}
-
-.score-container{
-  display:flex;
-  justify-content:space-around;
-  margin:30px 0;
-  flex-wrap:wrap;
-}
-
-.team{
-  background:white;
-  color:black;
-  padding:20px;
-  border-radius:15px;
-  width:300px;
-  margin:10px;
-}
-
-.score{
-  font-size:70px;
-  margin:20px 0;
+    padding:6px;
+    margin:4px;
 }
 
 button{
-  padding:10px 15px;
-  font-size:18px;
-  margin:5px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
+    padding:6px 10px;
+    margin:3px;
+    cursor:pointer;
 }
 
-.add1{background:#16a34a;color:white;}
-.add6{background:#b91c1c;color:white;}
-.sub{background:#dc2626;color:white;}
-.export-btn{background:#facc15;color:black;margin-top:20px;}
-.reset-btn{background:#333;color:white;margin-top:10px;}
-
-.stats-box{
-  margin-top:40px;
-  padding:20px;
-  border:1px solid #444;
-  border-radius:12px;
+#players{
+    margin-top:20px;
 }
 
-/* MODAL */
-#playerModal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.85);
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
+.player{
+    padding:6px;
+    border-bottom:1px solid #2e3c50;
 }
 
-.modal-content{
-  background:#111;
-  padding:25px;
-  border-radius:15px;
-  max-height:80vh;
-  overflow-y:auto;
-  width:320px;
+.exportArea{
+    background:#0f2238;
+    padding:20px;
+    width:900px;
+    margin:auto;
+    color:white;
 }
 
-.player-btn{
-  width:100%;
-  margin:6px 0;
-  background:#16a34a;
-  color:white;
-  font-size:18px;
+.headerLine{
+    font-size:18px;
+    margin-bottom:6px;
 }
 
-.small-note{
-  font-size:12px;
-  color:#aaa;
-  margin-top:8px;
+.divider{
+    height:1px;
+    background:#00c3ff55;
+    margin:10px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:6px;
+}
+
+.alt{
+    background:#142b47;
+}
+
+.logoSmall{
+    width:60px;
+}
+
+.glow{
+    text-shadow:0 0 15px #00c3ff;
 }
 </style>
 </head>
-
 <body>
 
-<h1>Tornados Scoreboard</h1>
+<h1 class="glow">TORNADOS SCOREBOARD</h1>
 
-<input type="text" id="categoryInput" placeholder="Category (U10, U14...)">
-<input type="text" id="jornadaInput" placeholder="Jornada / Game Week">
-
-<div class="score-container">
-
-  <div class="team">
-    <h2>Tornados</h2>
-    <div class="score" id="tornadosScore">0</div>
-    <button class="add1" onclick="updateScore('tornados',1)">+1</button>
-    <button class="add6" onclick="updateScore('tornados',6)">+6</button>
-    <button class="sub" onclick="updateScore('tornados',-1)">-1</button>
-  </div>
-
-  <div class="team">
-    <input type="text" id="opponentName" placeholder="Opponent Name">
-    <div class="score" id="opponentScore">0</div>
-    <button class="add1" onclick="updateScore('opponent',1)">+1</button>
-    <button class="add6" onclick="updateScore('opponent',6)">+6</button>
-    <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
-  </div>
-
+<div>
+Category: <input id="category" value="U14">
+Jornada: <input id="jornada" value="3">
 </div>
 
-<button class="export-btn" onclick="exportScore()">Export Final Score</button>
-<button class="export-btn" onclick="exportStatsImage()">Export Game Stats</button>
+<div>
+Home Score: <input id="homeScore" type="number" value="0">
+Away Score: <input id="awayScore" type="number" value="0">
+</div>
+
+<hr>
+
+<h3>Add Player</h3>
+<input id="playerName" placeholder="Player Name">
+<button onclick="addPlayer()">Add Player</button>
+
+<div id="players"></div>
+
 <br>
-<button class="reset-btn" onclick="resetGame()">Reset Game</button>
-
-<div class="stats-box">
-  <h2>Player Stats</h2>
-
-  <input type="text" id="playerName" placeholder="Player Name">
-  <button onclick="addPlayer()">Add Player</button>
-
-  <div style="margin-top:20px;">
-    <button onclick="openPlayerModal('TD')">+TD</button>
-    <button onclick="openPlayerModal('INT')">+INT</button>
-    <button onclick="openPlayerModal('SACK')">+SACK</button>
-    <button onclick="openPlayerModal('XP')">+XP</button>
-    <button onclick="openPlayerModal('TKL')">+TKL</button>
-    <button onclick="openPlayerModal('SAF')">+SAFETY</button>
-  </div>
-</div>
-
-<!-- PLAYER MODAL -->
-<div id="playerModal">
-  <div class="modal-content">
-    <h3>Select Player</h3>
-    <div id="playerList"></div>
-    <div class="small-note">Tap = Add | Long Press = Subtract</div>
-    <button onclick="closeModal()" style="background:#333;width:100%;margin-top:10px;">Cancel</button>
-  </div>
-</div>
+<button onclick="exportFinalScore()">Export Final Score</button>
+<button onclick="exportPlayerStats()">Export Player Stats</button>
 
 <script>
+let players = [];
 
-let tornadosScore=0;
-let opponentScore=0;
-let stats={};
-let selectedStatType=null;
-
-/* SCORE */
-function updateScore(team,value){
-  if(team==="tornados"){
-    tornadosScore=Math.max(0,tornadosScore+value);
-    document.getElementById("tornadosScore").innerText=tornadosScore;
-  }else{
-    opponentScore=Math.max(0,opponentScore+value);
-    document.getElementById("opponentScore").innerText=opponentScore;
-  }
-}
-
-/* RESET */
-function resetGame(){
-  if(confirm("Reset the game?")){
-    tornadosScore=0;
-    opponentScore=0;
-    stats={};
-    document.getElementById("tornadosScore").innerText=0;
-    document.getElementById("opponentScore").innerText=0;
-  }
-}
-
-/* PLAYER */
 function addPlayer(){
-  const name=document.getElementById("playerName").value.trim();
-  if(!name||stats[name]) return;
-  stats[name]={TD:0,INT:0,SACK:0,XP:0,TKL:0,SAF:0};
-  document.getElementById("playerName").value="";
-}
+    const name = document.getElementById("playerName").value.trim();
+    if(!name) return;
 
-/* MODAL */
-function openPlayerModal(statType){
-  selectedStatType=statType;
-  const modal=document.getElementById("playerModal");
-  const list=document.getElementById("playerList");
-  list.innerHTML="";
-  const players=Object.keys(stats);
-
-  if(players.length===0){
-    list.innerHTML="<p>No players added</p>";
-  }else{
-    players.forEach(player=>{
-      const btn=document.createElement("button");
-      btn.innerText=player;
-      btn.className="player-btn";
-
-      let pressTimer;
-
-      btn.onclick=()=>{
-        stats[player][selectedStatType]++;
-        closeModal();
-      };
-
-      btn.onmousedown=()=>{
-        pressTimer=setTimeout(()=>{
-          stats[player][selectedStatType]=Math.max(0,stats[player][selectedStatType]-1);
-          closeModal();
-        },600);
-      };
-
-      btn.onmouseup=()=>clearTimeout(pressTimer);
-      btn.onmouseleave=()=>clearTimeout(pressTimer);
-      btn.ontouchstart=btn.onmousedown;
-      btn.ontouchend=()=>clearTimeout(pressTimer);
-
-      list.appendChild(btn);
+    players.push({
+        name,
+        stats:{
+            TD:0,
+            FLAG:0,
+            CATCH:0
+        }
     });
-  }
-  modal.style.display="flex";
+
+    document.getElementById("playerName").value="";
+    renderPlayers();
 }
 
-function closeModal(){
-  document.getElementById("playerModal").style.display="none";
-}
-
-/* SHARE */
-async function shareCanvas(canvas,fileName){
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
-  const file=new File([blob],fileName,{type:"image/png"});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    await navigator.share({files:[file],title:fileName});
-  }else{
-    const link=document.createElement("a");
-    link.download=fileName;
-    link.href=URL.createObjectURL(blob);
-    link.click();
-  }
-}
-
-/* STATS EXPORT (UPGRADED, DESIGN SAFE) */
-function exportStatsImage(){
-
-  const canvas=document.createElement("canvas");
-  canvas.width=1080;
-  canvas.height=1350;
-  const ctx=canvas.getContext("2d");
-
-  ctx.fillStyle="#000";
-  ctx.fillRect(0,0,1080,1350);
-
-  const logo=new Image();
-  logo.src="./logo.PNG?"+new Date().getTime();
-
-  const now=new Date();
-  const formattedDate=now.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
-  const formattedTime=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-
-  logo.onload=function(){
-
-    ctx.drawImage(logo,490,40,100,100);
-
-    ctx.fillStyle="white";
-    ctx.textAlign="center";
-    ctx.font="bold 55px Arial";
-    ctx.fillText("TORNADOS GAME STATS",540,180);
-
-    const cat=document.getElementById("categoryInput").value||"";
-    const jorn=document.getElementById("jornadaInput").value||"";
-    let metaLine="";
-    if(cat && jorn) metaLine=cat+" • "+jorn;
-
-    ctx.font="32px Arial";
-    ctx.fillStyle="#00ffff";
-    ctx.fillText(metaLine,540,230);
-
-    ctx.fillStyle="#ccc";
-    ctx.font="26px Arial";
-    ctx.fillText(formattedDate+" | "+formattedTime,540,270);
-
-    ctx.strokeStyle="rgba(255,255,255,0.3)";
-    ctx.beginPath();
-    ctx.moveTo(150,300);
-    ctx.lineTo(930,300);
-    ctx.stroke();
-
-    const statColumns=["TD","INT","SACK","XP","TKL","SAF"];
-    const players=Object.keys(stats);
-    const rowHeight=55;
-    let startY=350;
-
-    ctx.font="28px Arial";
+function renderPlayers(){
+    const container=document.getElementById("players");
+    container.innerHTML="";
 
     players.forEach((player,index)=>{
+        const div=document.createElement("div");
+        div.className="player";
 
-      if(index%2===0){
-        ctx.fillStyle="rgba(255,255,255,0.05)";
-        ctx.fillRect(150,startY-35,780,rowHeight);
-      }
+        div.innerHTML=`
+        <strong>${player.name}</strong>
+        ${statButton(index,"TD")}
+        ${statButton(index,"FLAG")}
+        ${statButton(index,"CATCH")}
+        `;
 
-      ctx.fillStyle="white";
-      ctx.textAlign="left";
-      ctx.fillText(player.toUpperCase(),170,startY);
+        container.appendChild(div);
+    });
+}
 
-      statColumns.forEach((col,i)=>{
-        const value=stats[player][col]===0?"-":stats[player][col];
-        ctx.fillText(value,450+(i*80),startY);
-      });
+function statButton(index,stat){
+    return `
+    <button 
+    onmousedown="startPress(${index},'${stat}')"
+    onmouseup="endPress()"
+    ontouchstart="startPress(${index},'${stat}')"
+    ontouchend="endPress()"
+    onclick="addStat(${index},'${stat}')">
+    +${stat}
+    </button>
+    `;
+}
 
-      startY+=rowHeight;
+let pressTimer;
+function startPress(index,stat){
+    pressTimer = window.setTimeout(()=>{
+        subtractStat(index,stat);
+    },600);
+}
+
+function endPress(){
+    clearTimeout(pressTimer);
+}
+
+function addStat(index,stat){
+    players[index].stats[stat]++;
+    renderPlayers();
+}
+
+function subtractStat(index,stat){
+    if(players[index].stats[stat]>0){
+        players[index].stats[stat]--;
+        renderPlayers();
+    }
+}
+
+function formatDate(){
+    const now=new Date();
+    return now.toLocaleDateString('en-US',{
+        year:'numeric',
+        month:'long',
+        day:'numeric'
+    });
+}
+
+function formatTime(){
+    const now=new Date();
+    return now.toLocaleTimeString();
+}
+
+function exportFinalScore(){
+    const exportDiv=document.createElement("div");
+    exportDiv.className="exportArea";
+
+    exportDiv.innerHTML=`
+        <img src="logo.PNG" class="logoSmall"><br>
+        <div class="headerLine">
+            ${category.value} • Jornada ${jornada.value}
+        </div>
+        <div>${formatDate()} | ${formatTime()}</div>
+        <div class="divider"></div>
+        <h2>${homeScore.value} - ${awayScore.value}</h2>
+    `;
+
+    document.body.appendChild(exportDiv);
+
+    html2canvas(exportDiv).then(canvas=>{
+        downloadCanvas(canvas,"final_score.png");
+        document.body.removeChild(exportDiv);
+    });
+}
+
+function exportPlayerStats(){
+
+    const activePlayers = players.filter(p =>
+        Object.values(p.stats).some(v=>v>0)
+    );
+
+    if(activePlayers.length===0){
+        alert("No stats recorded.");
+        return;
+    }
+
+    const usedStats = Object.keys(activePlayers[0].stats).filter(stat =>
+        activePlayers.some(p=>p.stats[stat]>0)
+    );
+
+    const exportDiv=document.createElement("div");
+    exportDiv.className="exportArea";
+
+    let tableHTML="<table><tr><th>Player</th>";
+
+    usedStats.forEach(stat=>{
+        tableHTML+=`<th>${stat}</th>`;
     });
 
-    shareCanvas(canvas,"tornados-game-stats.PNG");
-  };
+    tableHTML+="</tr>";
+
+    activePlayers.forEach((p,i)=>{
+        tableHTML+=`<tr class="${i%2===0?'alt':''}">
+        <td>${p.name}</td>`;
+
+        usedStats.forEach(stat=>{
+            tableHTML+=`<td>${p.stats[stat]===0?'-':p.stats[stat]}</td>`;
+        });
+
+        tableHTML+="</tr>";
+    });
+
+    tableHTML+="</table>";
+
+    exportDiv.innerHTML=`
+        <img src="logo.PNG" class="logoSmall"><br>
+        <div class="headerLine">
+            ${category.value} • Jornada ${jornada.value}
+        </div>
+        <div>${formatDate()} | ${formatTime()}</div>
+        <div class="divider"></div>
+        ${tableHTML}
+    `;
+
+    document.body.appendChild(exportDiv);
+
+    html2canvas(exportDiv).then(canvas=>{
+        downloadCanvas(canvas,"player_stats.png");
+        document.body.removeChild(exportDiv);
+    });
+}
+
+function downloadCanvas(canvas,name){
+    const link=document.createElement("a");
+    link.download=name;
+    link.href=canvas.toDataURL();
+    link.click();
 }
 </script>
+
 </body>
 </html>
