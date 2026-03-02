@@ -142,7 +142,6 @@ button:hover{opacity:0.85;}
 
 <div class="stats-box">
   <h2>Player Stats</h2>
-
   <div style="margin-top:20px;">
     <button onclick="openPlayerModal('TD')">+TD</button>
     <button onclick="openPlayerModal('INT')">+INT</button>
@@ -160,7 +159,6 @@ button:hover{opacity:0.85;}
 
 <img id="teamLogo" src="logo.PNG" style="display:none;">
 
-<!-- PLAYER MODAL -->
 <div id="playerModal">
   <div class="modal-content">
     <h3>Select Player</h3>
@@ -176,6 +174,25 @@ let tornadosScore=0;
 let opponentScore=0;
 let stats={};
 let selectedStatType=null;
+
+/* MOBILE SHARE FUNCTION */
+async function shareCanvas(canvas,fileName){
+  const blob = await new Promise(resolve => canvas.toBlob(resolve,"image/png"));
+  const file = new File([blob], fileName, {type:"image/png"});
+
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({files:[file],title:fileName});
+    }catch(err){
+      console.log("Share cancelled");
+    }
+  }else{
+    const link=document.createElement("a");
+    link.download=fileName;
+    link.href=URL.createObjectURL(blob);
+    link.click();
+  }
+}
 
 /* SCORE */
 function updateScore(team,value){
@@ -253,12 +270,11 @@ function closeModal(){
   document.getElementById("playerModal").style.display="none";
 }
 
-/* FINAL SCORE EXPORT (UPGRADED) */
+/* FINAL SCORE EXPORT */
 function exportFinalScore(){
 
   const canvas=document.createElement("canvas");
   const ctx=canvas.getContext("2d");
-
   canvas.width=1080;
   canvas.height=900;
 
@@ -303,10 +319,7 @@ function exportFinalScore(){
     ctx.font="bold 120px Arial";
     ctx.fillText(tornadosScore+" - "+opponentScore,540,520);
 
-    const link=document.createElement("a");
-    link.download="tornados_final_score.png";
-    link.href=canvas.toDataURL("image/png");
-    link.click();
+    shareCanvas(canvas,"tornados_final_score.png");
   };
 }
 
@@ -387,10 +400,7 @@ function exportStatsImage(){
       startY+=rowHeight;
     });
 
-    const link=document.createElement("a");
-    link.download="tornados_game_stats.png";
-    link.href=canvas.toDataURL("image/png");
-    link.click();
+    shareCanvas(canvas,"tornados_game_stats.png");
   };
 }
 
