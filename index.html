@@ -3,39 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <title>Tornados Scoreboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
-  background:#0a0a0a;
-  color:white;
-  font-family:Arial;
+  font-family:Arial,sans-serif;
   text-align:center;
+  background:#000;
+  color:white;
+  margin:0;
+  padding:20px;
 }
 
-input, button{
-  padding:10px;
+h1{margin-bottom:10px;}
+
+input{
+  padding:8px;
+  font-size:18px;
+  border-radius:8px;
+  border:none;
+  text-align:center;
   margin:5px;
-  font-size:16px;
+}
+
+.score-container{
+  display:flex;
+  justify-content:space-around;
+  margin:30px 0;
+  flex-wrap:wrap;
+}
+
+.team{
+  background:white;
+  color:black;
+  padding:20px;
+  border-radius:15px;
+  width:300px;
+  margin:10px;
+}
+
+.score{
+  font-size:70px;
+  margin:20px 0;
 }
 
 button{
-  background:#16a34a;
-  color:white;
+  padding:10px 15px;
+  font-size:18px;
+  margin:5px;
+  border-radius:10px;
   border:none;
-  border-radius:6px;
   cursor:pointer;
 }
 
-button:hover{
-  opacity:0.85;
+.add1{background:#16a34a;color:white;}
+.add6{background:#b91c1c;color:white;}
+.sub{background:#dc2626;color:white;}
+.export-btn{background:#facc15;color:black;margin-top:20px;}
+.reset-btn{background:#333;color:white;margin-top:10px;}
+
+.stats-box{
+  margin-top:40px;
+  padding:20px;
+  border:1px solid #444;
+  border-radius:12px;
 }
 
-.stat-buttons button{
-  width:80px;
-  margin:8px;
-  font-weight:bold;
-}
-
+/* MODAL */
 #playerModal{
   display:none;
   position:fixed;
@@ -46,266 +80,260 @@ button:hover{
   z-index:1000;
 }
 
-#modalContent{
+.modal-content{
   background:#111;
-  padding:20px;
-  border-radius:12px;
-  width:300px;
+  padding:25px;
+  border-radius:15px;
   max-height:80vh;
   overflow-y:auto;
+  width:320px;
 }
 
-#modalContent button{
+.player-btn{
   width:100%;
   margin:6px 0;
+  background:#16a34a;
+  color:white;
+  font-size:18px;
+}
+
+.small-note{
+  font-size:12px;
+  color:#aaa;
+  margin-top:8px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>TORNADOS SCOREBOARD</h1>
+<h1>Tornados Scoreboard</h1>
 
-<input id="categoryInput" placeholder="Category (U14)">
-<input id="jornadaInput" placeholder="Jornada (3)">
-<br>
+<input type="text" id="categoryInput" placeholder="Category (U10, U14...)">
+<input type="text" id="jornadaInput" placeholder="Jornada / Game Week">
 
-<input id="playerNameInput" placeholder="Add Player Name">
-<button onclick="addPlayer()">Add Player</button>
+<div class="score-container">
 
-<div class="stat-buttons">
-  <button onclick="openPlayerModal('TD')">+TD</button>
-  <button onclick="openPlayerModal('INT')">+INT</button>
-  <button onclick="openPlayerModal('SACK')">+SACK</button>
-  <button onclick="openPlayerModal('XP')">+XP</button>
-  <button onclick="openPlayerModal('TKL')">+TKL</button>
-  <button onclick="openPlayerModal('SAF')">+SAF</button>
+  <div class="team">
+    <h2>Tornados</h2>
+    <div class="score" id="tornadosScore">0</div>
+    <button class="add1" onclick="updateScore('tornados',1)">+1</button>
+    <button class="add6" onclick="updateScore('tornados',6)">+6</button>
+    <button class="sub" onclick="updateScore('tornados',-1)">-1</button>
+  </div>
+
+  <div class="team">
+    <input type="text" id="opponentName" placeholder="Opponent Name">
+    <div class="score" id="opponentScore">0</div>
+    <button class="add1" onclick="updateScore('opponent',1)">+1</button>
+    <button class="add6" onclick="updateScore('opponent',6)">+6</button>
+    <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
+  </div>
+
 </div>
 
+<button class="export-btn" onclick="exportScore()">Export Final Score</button>
+<button class="export-btn" onclick="exportStatsImage()">Export Game Stats</button>
 <br>
-<button onclick="exportGameStatsImage()">Export Game Stats</button>
+<button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
-<img id="teamLogo" src="logo.PNG" style="display:none;">
+<div class="stats-box">
+  <h2>Player Stats</h2>
+
+  <input type="text" id="playerName" placeholder="Player Name">
+  <button onclick="addPlayer()">Add Player</button>
+
+  <div style="margin-top:20px;">
+    <button onclick="openPlayerModal('TD')">+TD</button>
+    <button onclick="openPlayerModal('INT')">+INT</button>
+    <button onclick="openPlayerModal('SACK')">+SACK</button>
+    <button onclick="openPlayerModal('XP')">+XP</button>
+    <button onclick="openPlayerModal('TKL')">+TKL</button>
+    <button onclick="openPlayerModal('SAF')">+SAFETY</button>
+  </div>
+</div>
 
 <!-- PLAYER MODAL -->
 <div id="playerModal">
-  <div id="modalContent">
+  <div class="modal-content">
     <h3>Select Player</h3>
     <div id="playerList"></div>
-    <button onclick="closeModal()">Cancel</button>
+    <div class="small-note">Tap = Add | Long Press = Subtract</div>
+    <button onclick="closeModal()" style="background:#333;width:100%;margin-top:10px;">Cancel</button>
   </div>
 </div>
 
 <script>
 
-let stats = {};
-let selectedStatType = null;
+let tornadosScore=0;
+let opponentScore=0;
+let stats={};
+let selectedStatType=null;
 
-// Add Player
-function addPlayer(){
-  const nameInput = document.getElementById("playerNameInput");
-  const name = nameInput.value.trim();
-  if(!name) return;
-
-  if(!stats[name]){
-    stats[name] = { TD:0, INT:0, SACK:0, XP:0, TKL:0, SAF:0 };
+/* SCORE */
+function updateScore(team,value){
+  if(team==="tornados"){
+    tornadosScore=Math.max(0,tornadosScore+value);
+    document.getElementById("tornadosScore").innerText=tornadosScore;
+  }else{
+    opponentScore=Math.max(0,opponentScore+value);
+    document.getElementById("opponentScore").innerText=opponentScore;
   }
-
-  nameInput.value = "";
 }
 
-// Open Modal
+/* RESET */
+function resetGame(){
+  if(confirm("Reset the game?")){
+    tornadosScore=0;
+    opponentScore=0;
+    stats={};
+    document.getElementById("tornadosScore").innerText=0;
+    document.getElementById("opponentScore").innerText=0;
+  }
+}
+
+/* PLAYER */
+function addPlayer(){
+  const name=document.getElementById("playerName").value.trim();
+  if(!name||stats[name]) return;
+  stats[name]={TD:0,INT:0,SACK:0,XP:0,TKL:0,SAF:0};
+  document.getElementById("playerName").value="";
+}
+
+/* MODAL */
 function openPlayerModal(statType){
-  selectedStatType = statType;
+  selectedStatType=statType;
+  const modal=document.getElementById("playerModal");
+  const list=document.getElementById("playerList");
+  list.innerHTML="";
+  const players=Object.keys(stats);
 
-  const list = document.getElementById("playerList");
-  list.innerHTML = "";
-
-  const players = Object.keys(stats);
-
-  if(players.length === 0){
-    list.innerHTML = "<p>No players added</p>";
-  } else {
-
-    players.forEach(player => {
-
-      const btn = document.createElement("button");
-      btn.innerText = player;
+  if(players.length===0){
+    list.innerHTML="<p>No players added</p>";
+  }else{
+    players.forEach(player=>{
+      const btn=document.createElement("button");
+      btn.innerText=player;
+      btn.className="player-btn";
 
       let pressTimer;
 
-      // Short click = add stat
-      btn.onclick = () => {
+      btn.onclick=()=>{
         stats[player][selectedStatType]++;
-        if(navigator.vibrate) navigator.vibrate(40);
         closeModal();
       };
 
-      // Long press = subtract stat
-      btn.onmousedown = () => {
-        pressTimer = setTimeout(() => {
-          if(stats[player][selectedStatType] > 0){
-            stats[player][selectedStatType]--;
-          }
-          if(navigator.vibrate) navigator.vibrate([50,50,50]);
+      btn.onmousedown=()=>{
+        pressTimer=setTimeout(()=>{
+          stats[player][selectedStatType]=Math.max(0,stats[player][selectedStatType]-1);
           closeModal();
-        }, 700);
+        },600);
       };
 
-      btn.onmouseup = () => clearTimeout(pressTimer);
-      btn.onmouseleave = () => clearTimeout(pressTimer);
+      btn.onmouseup=()=>clearTimeout(pressTimer);
+      btn.onmouseleave=()=>clearTimeout(pressTimer);
+      btn.ontouchstart=btn.onmousedown;
+      btn.ontouchend=()=>clearTimeout(pressTimer);
 
       list.appendChild(btn);
     });
   }
-
-  document.getElementById("playerModal").style.display = "flex";
+  modal.style.display="flex";
 }
 
-// Close Modal
 function closeModal(){
-  document.getElementById("playerModal").style.display = "none";
+  document.getElementById("playerModal").style.display="none";
 }
 
-// EXPORT FUNCTION
-function exportGameStatsImage() {
-
-  if(Object.keys(stats).length === 0){
-    alert("No player stats to export.");
-    return;
+/* SHARE */
+async function shareCanvas(canvas,fileName){
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+  const file=new File([blob],fileName,{type:"image/png"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:fileName});
+  }else{
+    const link=document.createElement("a");
+    link.download=fileName;
+    link.href=URL.createObjectURL(blob);
+    link.click();
   }
+}
 
-  const category = document.getElementById("categoryInput").value || "";
-  const jornada = document.getElementById("jornadaInput").value || "";
+/* STATS EXPORT (UPGRADED, DESIGN SAFE) */
+function exportStatsImage(){
 
-  const logoImg = new Image();
-  logoImg.src = "logo.PNG";
+  const canvas=document.createElement("canvas");
+  canvas.width=1080;
+  canvas.height=1350;
+  const ctx=canvas.getContext("2d");
 
-  logoImg.onload = function(){
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,1080,1350);
 
-    const now = new Date();
+  const logo=new Image();
+  logo.src="./logo.PNG?"+new Date().getTime();
 
-    const formattedDate = now.toLocaleDateString("en-US", {
-      year:"numeric",
-      month:"long",
-      day:"numeric"
-    });
+  const now=new Date();
+  const formattedDate=now.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+  const formattedTime=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
-    const formattedTime = now.toLocaleTimeString("en-US", {
-      hour:"2-digit",
-      minute:"2-digit"
-    });
+  logo.onload=function(){
 
-    const players = Object.keys(stats);
+    ctx.drawImage(logo,490,40,100,100);
 
-    const rowHeight = 45;
-    const headerHeight = 260;
-    const canvasWidth = 900;
-    const canvasHeight = headerHeight + (players.length * rowHeight) + 80;
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-
-    // Background
-    ctx.fillStyle = "#0a0a0a";
-    ctx.fillRect(0,0,canvasWidth,canvasHeight);
-
-    // Glow
-    const glow = ctx.createRadialGradient(
-      canvasWidth/2,0,100,
-      canvasWidth/2,0,600
-    );
-    glow.addColorStop(0,"rgba(0,255,255,0.25)");
-    glow.addColorStop(1,"transparent");
-    ctx.fillStyle = glow;
-    ctx.fillRect(0,0,canvasWidth,canvasHeight);
-
-    // Logo
-    const logoSize = 80;
-    ctx.drawImage(
-      logoImg,
-      (canvasWidth/2)-(logoSize/2),
-      20,
-      logoSize,
-      logoSize
-    );
-
-    // Title
-    ctx.fillStyle="#ffffff";
-    ctx.font="bold 40px Arial";
+    ctx.fillStyle="white";
     ctx.textAlign="center";
-    ctx.fillText("TORNADOS GAME STATS", canvasWidth/2,130);
+    ctx.font="bold 55px Arial";
+    ctx.fillText("TORNADOS GAME STATS",540,180);
 
-    // Category + Jornada
-    ctx.font="24px Arial";
+    const cat=document.getElementById("categoryInput").value||"";
+    const jorn=document.getElementById("jornadaInput").value||"";
+    let metaLine="";
+    if(cat && jorn) metaLine=cat+" • "+jorn;
+
+    ctx.font="32px Arial";
     ctx.fillStyle="#00ffff";
-    ctx.fillText(`${category} • Jornada ${jornada}`, canvasWidth/2,165);
+    ctx.fillText(metaLine,540,230);
 
-    // Date + Time
-    ctx.fillStyle="#cccccc";
-    ctx.font="20px Arial";
-    ctx.fillText(`${formattedDate} | ${formattedTime}`, canvasWidth/2,195);
+    ctx.fillStyle="#ccc";
+    ctx.font="26px Arial";
+    ctx.fillText(formattedDate+" | "+formattedTime,540,270);
 
-    // Divider
-    ctx.strokeStyle="#333";
-    ctx.lineWidth=2;
+    ctx.strokeStyle="rgba(255,255,255,0.3)";
     ctx.beginPath();
-    ctx.moveTo(80,215);
-    ctx.lineTo(canvasWidth-80,215);
+    ctx.moveTo(150,300);
+    ctx.lineTo(930,300);
     ctx.stroke();
 
-    // Headers
-    ctx.textAlign="left";
-    ctx.font="bold 20px Arial";
-    ctx.fillStyle="#ffffff";
+    const statColumns=["TD","INT","SACK","XP","TKL","SAF"];
+    const players=Object.keys(stats);
+    const rowHeight=55;
+    let startY=350;
 
-    const startY = 250;
-
-    ctx.fillText("Player",100,startY);
-    ctx.fillText("TD",420,startY);
-    ctx.fillText("INT",480,startY);
-    ctx.fillText("SACK",550,startY);
-    ctx.fillText("XP",630,startY);
-    ctx.fillText("TKL",690,startY);
-    ctx.fillText("SAF",760,startY);
-
-    ctx.font="18px Arial";
+    ctx.font="28px Arial";
 
     players.forEach((player,index)=>{
 
-      const y = startY+30+(index*rowHeight);
+      if(index%2===0){
+        ctx.fillStyle="rgba(255,255,255,0.05)";
+        ctx.fillRect(150,startY-35,780,rowHeight);
+      }
 
-      ctx.fillStyle = index%2===0 ? "#111111" : "#1a1a1a";
-      ctx.fillRect(80,y-25,canvasWidth-160,rowHeight);
+      ctx.fillStyle="white";
+      ctx.textAlign="left";
+      ctx.fillText(player.toUpperCase(),170,startY);
 
-      ctx.fillStyle="#ffffff";
+      statColumns.forEach((col,i)=>{
+        const value=stats[player][col]===0?"-":stats[player][col];
+        ctx.fillText(value,450+(i*80),startY);
+      });
 
-      const p = stats[player];
-
-      ctx.fillText(player,100,y);
-      ctx.fillText(p.TD===0?"-":p.TD,420,y);
-      ctx.fillText(p.INT===0?"-":p.INT,480,y);
-      ctx.fillText(p.SACK===0?"-":p.SACK,550,y);
-      ctx.fillText(p.XP===0?"-":p.XP,630,y);
-      ctx.fillText(p.TKL===0?"-":p.TKL,690,y);
-      ctx.fillText(p.SAF===0?"-":p.SAF,760,y);
+      startY+=rowHeight;
     });
 
-    ctx.textAlign="center";
-    ctx.fillStyle="#666";
-    ctx.font="16px Arial";
-    ctx.fillText("Powered by Tornados Scoreboard",canvasWidth/2,canvasHeight-30);
-
-    const link=document.createElement("a");
-    link.download="tornados_game_stats.png";
-    link.href=canvas.toDataURL("image/png");
-    link.click();
+    shareCanvas(canvas,"tornados-game-stats.PNG");
   };
 }
-
 </script>
 </body>
 </html>
