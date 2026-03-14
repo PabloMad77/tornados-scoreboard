@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -6,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <!-- PWA / Add to Home Screen -->
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tornados">
@@ -13,6 +15,7 @@
 <meta name="theme-color" content="#0a0a0a">
 
 <!-- Home screen icon -->
+
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/PabloMad77/tornados-scoreboard/main/logo.PNG">
 <link rel="icon" href="https://raw.githubusercontent.com/PabloMad77/tornados-scoreboard/main/logo.PNG">
 
@@ -267,6 +270,7 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 
 .subtitle { opacity: 0.6; font-size: 14px; margin: 0 0 16px; }
 </style>
+
 </head>
 
 <body>
@@ -276,7 +280,7 @@ tr:hover td { background: rgba(249,115,22,0.08); }
   <h1>Tornados</h1>
 
   <div>
-    <input id="categoryName" placeholder="Category / League">
+    <input id="categoryName" placeholder="Category / League" oninput="saveGameState()">
   </div>
 
   <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:6px;">
@@ -292,30 +296,32 @@ tr:hover td { background: rgba(249,115,22,0.08); }
       <option>Final</option>
       <option value="custom">Custom...</option>
     </select>
-    <input id="customJornada" placeholder="Custom match name" style="display:none; max-width:180px;">
+    <input id="customJornada" placeholder="Custom match name" style="display:none; max-width:180px;" oninput="saveGameState()">
   </div>
 
   <div class="score-container">
 
-    <div class="team">
-      <h2>Tornados</h2>
-      <div class="score" id="tornadosScore">0</div>
-      <div class="score-buttons">
-        <button class="add1" onclick="updateScore('tornados',1)">+1</button>
-        <button class="add6" onclick="updateScore('tornados',6)">+6</button>
-        <button class="sub"  onclick="updateScore('tornados',-1)">-1</button>
-      </div>
-    </div>
+```
+<div class="team">
+  <h2>Tornados</h2>
+  <div class="score" id="tornadosScore">0</div>
+  <div class="score-buttons">
+    <button class="add1" onclick="updateScore('tornados',1)">+1</button>
+    <button class="add6" onclick="updateScore('tornados',6)">+6</button>
+    <button class="sub"  onclick="updateScore('tornados',-1)">-1</button>
+  </div>
+</div>
 
-    <div class="team">
-      <input id="opponentName" placeholder="Opponent Name">
-      <div class="score" id="opponentScore">0</div>
-      <div class="score-buttons">
-        <button class="add1" onclick="updateScore('opponent',1)">+1</button>
-        <button class="add6" onclick="updateScore('opponent',6)">+6</button>
-        <button class="sub"  onclick="updateScore('opponent',-1)">-1</button>
-      </div>
-    </div>
+<div class="team">
+  <input id="opponentName" placeholder="Opponent Name" oninput="saveGameState()">
+  <div class="score" id="opponentScore">0</div>
+  <div class="score-buttons">
+    <button class="add1" onclick="updateScore('opponent',1)">+1</button>
+    <button class="add6" onclick="updateScore('opponent',6)">+6</button>
+    <button class="sub"  onclick="updateScore('opponent',-1)">-1</button>
+  </div>
+</div>
+```
 
   </div>
 
@@ -363,8 +369,8 @@ tr:hover td { background: rgba(249,115,22,0.08); }
   <button class="export-btn" onclick="exportStats()">Export Stats Image</button>
 </div>
 
-
 <!-- IMAGE PREVIEW MODAL -->
+
 <div class="modal" id="previewModal">
   <div class="modal-box" style="max-width:500px; text-align:center;">
     <button class="modal-close" onclick="closeModal('previewModal')">✕</button>
@@ -379,6 +385,7 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 </div>
 
 <!-- STAT MODAL -->
+
 <div class="modal" id="statModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('statModal')">✕</button>
@@ -389,34 +396,67 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 </div>
 
 <!-- PLAYER MANAGER MODAL -->
+
 <div class="modal" id="playerModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('playerModal')">✕</button>
     <h3>Manage Players</h3>
 
-    <div id="playerList" style="margin-bottom:16px; text-align:left;"></div>
+```
+<div id="playerList" style="margin-bottom:16px; text-align:left;"></div>
 
-    <div style="background:#222; border-radius:10px; padding:16px;">
-      <strong style="display:block; margin-bottom:8px; color:#ccc;">Add New Player</strong>
-      <div class="add-player-row">
-        <input id="newPlayerName" placeholder="Player name">
-        <select id="newPlayerUnit" style="background:#2a2a2a; color:white; border:2px solid #333;">
-          <option value="offense">Offense</option>
-          <option value="defense">Defense</option>
-        </select>
-      </div>
-      <button onclick="addPlayer()" style="background:var(--orange); color:black; margin-top:10px; width:100%; padding:12px; font-weight:700;">
-        Add Player
-      </button>
-    </div>
+<div style="background:#222; border-radius:10px; padding:16px;">
+  <strong style="display:block; margin-bottom:8px; color:#ccc;">Add New Player</strong>
+  <div class="add-player-row">
+    <input id="newPlayerName" placeholder="Player name">
+    <select id="newPlayerUnit" style="background:#2a2a2a; color:white; border:2px solid #333;">
+      <option value="offense">Offense</option>
+      <option value="defense">Defense</option>
+    </select>
+  </div>
+  <button onclick="addPlayer()" style="background:var(--orange); color:black; margin-top:10px; width:100%; padding:12px; font-weight:700;">
+    Add Player
+  </button>
+</div>
+```
+
   </div>
 </div>
-
 
 <script>
 
 let tornadosScore = 0;
 let opponentScore  = 0;
+
+function saveGameState() {
+  const state = {
+    tornadosScore,
+    opponentScore,
+    opponentName: document.getElementById('opponentName').value,
+    category:     document.getElementById('categoryName').value,
+    jornada:      document.getElementById('jornadaSelect').value,
+    customJornada: document.getElementById('customJornada').value,
+  };
+  localStorage.setItem('tornados_game', JSON.stringify(state));
+}
+
+function loadGameState() {
+  const saved = JSON.parse(localStorage.getItem('tornados_game') || 'null');
+  if (!saved) return;
+  tornadosScore = saved.tornadosScore || 0;
+  opponentScore = saved.opponentScore || 0;
+  document.getElementById('tornadosScore').innerText = tornadosScore;
+  document.getElementById('opponentScore').innerText = opponentScore;
+  document.getElementById('opponentName').value  = saved.opponentName || '';
+  document.getElementById('categoryName').value  = saved.category || '';
+  document.getElementById('jornadaSelect').value = saved.jornada || '';
+  if (saved.jornada === 'custom') {
+    document.getElementById('customJornada').style.display = 'inline-block';
+    document.getElementById('customJornada').value = saved.customJornada || '';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadGameState);
 
 function updateScore(team, val) {
   const key = team === 'tornados' ? 'tornadosScore' : 'opponentScore';
@@ -432,10 +472,12 @@ function updateScore(team, val) {
   void el.offsetWidth;
   el.classList.add('bump');
   setTimeout(() => el.classList.remove('bump'), 200);
+  saveGameState();
 }
 
 function resetGame() {
   if (confirm('Reset game? All scores will be cleared.')) {
+    localStorage.removeItem('tornados_game');
     location.reload();
   }
 }
@@ -444,6 +486,7 @@ function handleJornadaChange() {
   const select = document.getElementById('jornadaSelect');
   const custom = document.getElementById('customJornada');
   custom.style.display = select.value === 'custom' ? 'inline-block' : 'none';
+  saveGameState();
 }
 
 // ─── Players ───────────────────────────────────────────────────────────────
@@ -670,21 +713,21 @@ function drawFooter(ctx) {
   ctx.fillStyle = C.orange;
   ctx.fillRect(0, IG_H - 18, IG_W, 18);
 
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.font = '500 28px Oswald, Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '600 52px Oswald, Arial';
   ctx.textAlign = 'center';
-  ctx.fillText('TORNADOS FLAG FOOTBALL', IG_W / 2, IG_H - 110);
+  ctx.fillText('TORNADOS FLAG FOOTBALL', IG_W / 2, IG_H - 130);
 
   const metaLine = [category, jornada].filter(Boolean).join('  ·  ');
   if (metaLine) {
     ctx.fillStyle = C.orange;
-    ctx.font = 'bold 30px Oswald, Arial';
+    ctx.font = 'bold 58px Oswald, Arial';
     ctx.fillText(metaLine.toUpperCase(), IG_W / 2, IG_H - 72);
   }
 
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.font = '400 24px Oswald, Arial';
-  ctx.fillText(timestamp, IG_W / 2, IG_H - 36);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '500 42px Oswald, Arial';
+  ctx.fillText(timestamp, IG_W / 2, IG_H - 26);
 }
 
 function drawScoreCard(logo) {
@@ -968,5 +1011,6 @@ function exportStats() {
 }
 
 </script>
+
 </body>
 </html>
