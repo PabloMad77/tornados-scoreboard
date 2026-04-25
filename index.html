@@ -6,15 +6,11 @@
 <title>Tornados Scoreboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<!-- PWA / Add to Home Screen -->
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tornados">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a0a">
-
-<!-- Home screen icon -->
 
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/PabloMad77/tornados-scoreboard/main/logo.PNG">
 <link rel="icon" href="https://raw.githubusercontent.com/PabloMad77/tornados-scoreboard/main/logo.PNG">
@@ -192,7 +188,6 @@ th { background: var(--orange-dark); color: white; font-family: 'Oswald', sans-s
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: rgba(249,115,22,0.08); }
 
-/* MODALS */
 .modal {
   display: none;
   position: fixed;
@@ -279,7 +274,6 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 <body>
 
 <div id="scoreExportArea">
-
   <h1>Tornados</h1>
 
   <div>
@@ -303,29 +297,26 @@ tr:hover td { background: rgba(249,115,22,0.08); }
   </div>
 
   <div class="score-container">
+    <div class="team">
+      <h2>Tornados</h2>
+      <div class="score" id="tornadosScore">0</div>
+      <div class="score-buttons">
+        <button class="add1" onclick="updateScore('tornados',1)">+1</button>
+        <button class="add6" onclick="updateScore('tornados',6)">+6</button>
+        <button class="sub"  onclick="updateScore('tornados',-1)">-1</button>
+      </div>
+    </div>
 
-<div class="team">
-  <h2>Tornados</h2>
-  <div class="score" id="tornadosScore">0</div>
-  <div class="score-buttons">
-    <button class="add1" onclick="updateScore('tornados',1)">+1</button>
-    <button class="add6" onclick="updateScore('tornados',6)">+6</button>
-    <button class="sub"  onclick="updateScore('tornados',-1)">-1</button>
+    <div class="team">
+      <input id="opponentName" placeholder="Opponent Name" oninput="saveGameState()">
+      <div class="score" id="opponentScore">0</div>
+      <div class="score-buttons">
+        <button class="add1" onclick="updateScore('opponent',1)">+1</button>
+        <button class="add6" onclick="updateScore('opponent',6)">+6</button>
+        <button class="sub"  onclick="updateScore('opponent',-1)">-1</button>
+      </div>
+    </div>
   </div>
-</div>
-
-<div class="team">
-  <input id="opponentName" placeholder="Opponent Name" oninput="saveGameState()">
-  <div class="score" id="opponentScore">0</div>
-  <div class="score-buttons">
-    <button class="add1" onclick="updateScore('opponent',1)">+1</button>
-    <button class="add6" onclick="updateScore('opponent',6)">+6</button>
-    <button class="sub"  onclick="updateScore('opponent',-1)">-1</button>
-  </div>
-</div>
-
-  </div>
-
 </div>
 
 <div class="game-controls">
@@ -336,7 +327,6 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 <hr>
 
 <div id="statsExportArea">
-
   <h2>Player Stats</h2>
 
   <button onclick="openPlayerManager()" style="background:rgba(249,115,22,0.15); color:var(--orange); font-weight:600; margin-bottom:16px; border:1px solid rgba(249,115,22,0.3);">
@@ -363,7 +353,6 @@ tr:hover td { background: rgba(249,115,22,0.08); }
   <table id="defenseTable">
     <tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>
   </table>
-
 </div>
 
 <div style="margin-top:16px;">
@@ -371,7 +360,6 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 </div>
 
 <!-- IMAGE PREVIEW MODAL -->
-
 <div class="modal" id="previewModal">
   <div class="modal-box" style="max-width:500px; text-align:center;">
     <button class="modal-close" onclick="closeModal('previewModal')">✕</button>
@@ -386,7 +374,6 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 </div>
 
 <!-- STAT MODAL -->
-
 <div class="modal" id="statModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('statModal')">✕</button>
@@ -397,28 +384,26 @@ tr:hover td { background: rgba(249,115,22,0.08); }
 </div>
 
 <!-- PLAYER MANAGER MODAL -->
-
 <div class="modal" id="playerModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('playerModal')">✕</button>
     <h3>Manage Players</h3>
 
-<div id="playerList" style="margin-bottom:16px; text-align:left;"></div>
+    <div id="playerList" style="margin-bottom:16px; text-align:left;"></div>
 
-<div style="background:#222; border-radius:10px; padding:16px;">
-  <strong style="display:block; margin-bottom:8px; color:#ccc;">Add New Player</strong>
-  <div class="add-player-row">
-    <input id="newPlayerName" placeholder="Player name">
-    <select id="newPlayerUnit" style="background:#2a2a2a; color:white; border:2px solid #333;">
-      <option value="offense">Offense</option>
-      <option value="defense">Defense</option>
-    </select>
-  </div>
-  <button onclick="addPlayer()" style="background:var(--orange); color:black; margin-top:10px; width:100%; padding:12px; font-weight:700;">
-    Add Player
-  </button>
-</div>
-
+    <div style="background:#222; border-radius:10px; padding:16px;">
+      <strong style="display:block; margin-bottom:8px; color:#ccc;">Add New Player</strong>
+      <div class="add-player-row">
+        <input id="newPlayerName" placeholder="Player name">
+        <select id="newPlayerUnit" style="background:#2a2a2a; color:white; border:2px solid #333;">
+          <option value="offense">Offense</option>
+          <option value="defense">Defense</option>
+        </select>
+      </div>
+      <button onclick="addPlayer()" style="background:var(--orange); color:black; margin-top:10px; width:100%; padding:12px; font-weight:700;">
+        Add Player
+      </button>
+    </div>
   </div>
 </div>
 
@@ -488,7 +473,7 @@ function handleJornadaChange() {
   saveGameState();
 }
 
-// ─── Players ───────────────────────────────────────────────────────────────
+// ─── Players ────────────────────────────────────────────────────────────────
 
 let players = JSON.parse(localStorage.getItem('tornados_players') || '[]');
 
@@ -539,7 +524,7 @@ function removePlayer(id) {
   renderAll();
 }
 
-// ─── Stats ──────────────────────────────────────────────────────────────────
+// ─── Stats ───────────────────────────────────────────────────────────────────
 
 let currentStat = '';
 let currentUnit = '';
@@ -626,7 +611,7 @@ function renderAll() {
 
 renderAll();
 
-// ─── Modals ─────────────────────────────────────────────────────────────────
+// ─── Modals ──────────────────────────────────────────────────────────────────
 
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -641,7 +626,16 @@ window.addEventListener('click', e => {
 // ─── Canvas Export ───────────────────────────────────────────────────────────
 
 const IG_W = 1080;
-const IG_H = 1350;
+
+// Layout constants shared between score and stats cards
+const LAYOUT = {
+  PAD:        50,
+  TOP_BAR:    18,
+  BOTTOM_BAR: 18,
+  FOOTER_H:   170,  // space reserved at bottom for footer text
+  ROW_H:      68,
+  HEAD_H:     58,
+};
 
 const C = {
   black:      '#0a0a0a',
@@ -694,71 +688,87 @@ function drawLogoWithGlow(ctx, img, x, y, size) {
 }
 
 function getMetaInfo() {
-  const category  = document.getElementById('categoryName').value.trim();
+  const category   = document.getElementById('categoryName').value.trim();
   const jornadaSel = document.getElementById('jornadaSelect');
-  const customJ   = document.getElementById('customJornada').value.trim();
-  const jornada   = jornadaSel.value === 'custom' ? customJ : jornadaSel.value || '';
-  const now       = new Date();
-  const timestamp = now.toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
-                  + '  •  '
-                  + now.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+  const customJ    = document.getElementById('customJornada').value.trim();
+  const jornada    = jornadaSel.value === 'custom' ? customJ : jornadaSel.value || '';
+  const now        = new Date();
+  const timestamp  = now.toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
+                   + '  •  '
+                   + now.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
   return { category, jornada, timestamp };
 }
 
-function drawFooter(ctx) {
-  const { category, jornada, timestamp } = getMetaInfo();
-
-  // Orange bottom bar
-  ctx.fillStyle = C.orange;
-  ctx.fillRect(0, IG_H - 18, IG_W, 18);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '600 52px Oswald, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('TORNADOS FLAG FOOTBALL', IG_W / 2, IG_H - 130);
-
-  const metaLine = [category, jornada].filter(Boolean).join('  ·  ');
-  if (metaLine) {
-    ctx.fillStyle = C.orange;
-    ctx.font = 'bold 58px Oswald, Arial';
-    ctx.fillText(metaLine.toUpperCase(), IG_W / 2, IG_H - 72);
-  }
-
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.font = '500 42px Oswald, Arial';
-  ctx.fillText(timestamp, IG_W / 2, IG_H - 26);
-}
-
-function drawScoreCard(logo) {
-  const canvas = document.createElement('canvas');
-  canvas.width  = IG_W;
-  canvas.height = IG_H;
-  const ctx = canvas.getContext('2d');
-
-  // Background
-  const bg = ctx.createLinearGradient(0, 0, IG_W, IG_H);
+function drawBackground(ctx, w, h) {
+  const bg = ctx.createLinearGradient(0, 0, w, h);
   bg.addColorStop(0,   '#080808');
   bg.addColorStop(0.5, '#111111');
   bg.addColorStop(1,   '#1a1a1a');
   ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, IG_W, IG_H);
+  ctx.fillRect(0, 0, w, h);
 
   // Subtle diagonal accent
   ctx.save();
   ctx.globalAlpha = 0.04;
   ctx.fillStyle = C.orange;
   ctx.beginPath();
-  ctx.moveTo(0, IG_H * 0.55);
-  ctx.lineTo(IG_W, IG_H * 0.3);
-  ctx.lineTo(IG_W, IG_H * 0.6);
-  ctx.lineTo(0, IG_H * 0.85);
+  ctx.moveTo(0, h * 0.55);
+  ctx.lineTo(w, h * 0.3);
+  ctx.lineTo(w, h * 0.6);
+  ctx.lineTo(0, h * 0.85);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
+}
 
-  // Orange top bar
+function drawTopBar(ctx, w) {
   ctx.fillStyle = C.orange;
-  ctx.fillRect(0, 0, IG_W, 18);
+  ctx.fillRect(0, 0, w, LAYOUT.TOP_BAR);
+}
+
+function drawFooter(ctx, w, h) {
+  const { category, jornada, timestamp } = getMetaInfo();
+
+  // Orange bottom bar
+  ctx.fillStyle = C.orange;
+  ctx.fillRect(0, h - LAYOUT.BOTTOM_BAR, w, LAYOUT.BOTTOM_BAR);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '600 52px Oswald, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('TORNADOS FLAG FOOTBALL', w / 2, h - 130);
+
+  const metaLine = [category, jornada].filter(Boolean).join('  ·  ');
+  if (metaLine) {
+    ctx.fillStyle = C.orange;
+    ctx.font = 'bold 58px Oswald, Arial';
+    ctx.fillText(metaLine.toUpperCase(), w / 2, h - 72);
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '500 42px Oswald, Arial';
+  ctx.fillText(timestamp, w / 2, h - 26);
+}
+
+// ─── Score Card ──────────────────────────────────────────────────────────────
+// Height: top bar + logo area + score cards + separator + footer
+
+function calcScoreCardHeight() {
+  const logoH   = 380;  // logo circle area
+  const cardsH  = 440;  // score card area
+  const sepH    = 80;   // separator gap
+  return LAYOUT.TOP_BAR + logoH + cardsH + sepH + LAYOUT.FOOTER_H + LAYOUT.BOTTOM_BAR;
+}
+
+function drawScoreCard(logo) {
+  const h = calcScoreCardHeight();
+  const canvas = document.createElement('canvas');
+  canvas.width  = IG_W;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  drawBackground(ctx, IG_W, h);
+  drawTopBar(ctx, IG_W);
 
   // Logo or title
   if (logo) {
@@ -835,28 +845,66 @@ function drawScoreCard(logo) {
   ctx.stroke();
   ctx.globalAlpha = 1;
 
-  drawFooter(ctx);
+  drawFooter(ctx, IG_W, h);
   return canvas;
 }
 
+// ─── Stats Card ──────────────────────────────────────────────────────────────
+
+function calcStatsCardHeight(offRows, defRows) {
+  const PAD     = LAYOUT.PAD;
+  const HEAD_H  = LAYOUT.HEAD_H;
+  const ROW_H   = LAYOUT.ROW_H;
+
+  // Header area: top bar + title
+  const titleH = 200;
+
+  // Each table: section title (50) + underline pad (20) + header row + rows
+  const offTableH = 70 + HEAD_H + offRows * ROW_H;
+  const defTableH = 70 + HEAD_H + defRows * ROW_H;
+
+  // Gaps: between title and first table, between tables, before footer
+  const gapAfterTitle    = 30;
+  const gapBetweenTables = 90;
+  const gapBeforeFooter  = 60;
+
+  return (
+    LAYOUT.TOP_BAR
+    + titleH
+    + gapAfterTitle
+    + offTableH
+    + gapBetweenTables
+    + defTableH
+    + gapBeforeFooter
+    + LAYOUT.FOOTER_H
+    + LAYOUT.BOTTOM_BAR
+  );
+}
+
 function drawStatsCard(logo) {
+  // Filter to players with stats
+  const offWithStats = players
+    .filter(p => p.unit === 'offense')
+    .filter(p => p.td > 0 || p.catch > 0 || p.xp > 0);
+
+  const defWithStats = players
+    .filter(p => p.unit === 'defense')
+    .filter(p => p.int > 0 || p.flag > 0 || p.sack > 0 || p.defTd > 0);
+
+  const offRows = offWithStats.length ? offWithStats.map(p => [p.name, p.td, p.catch, p.xp]) : [['—','—','—','—']];
+  const defRows = defWithStats.length ? defWithStats.map(p => [p.name, p.int, p.flag, p.sack, p.defTd]) : [['—','—','—','—','—']];
+
+  const h = calcStatsCardHeight(offRows.length, defRows.length);
+
   const canvas = document.createElement('canvas');
   canvas.width  = IG_W;
-  canvas.height = IG_H;
+  canvas.height = h;
   const ctx = canvas.getContext('2d');
 
-  // Background
-  const bg = ctx.createLinearGradient(0, 0, IG_W, IG_H);
-  bg.addColorStop(0, '#080808');
-  bg.addColorStop(1, '#1a1a1a');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, IG_W, IG_H);
+  drawBackground(ctx, IG_W, h);
+  drawTopBar(ctx, IG_W);
 
-  // Orange top bar
-  ctx.fillStyle = C.orange;
-  ctx.fillRect(0, 0, IG_W, 18);
-
-  // Logo + ESTADÍSTICAS inline
+  // Title row: logo + ESTADÍSTICAS
   const TITLE_Y = 140;
   if (logo) {
     const logoSize = 90;
@@ -885,13 +933,13 @@ function drawStatsCard(logo) {
     ctx.fillText('ESTADÍSTICAS', IG_W / 2, TITLE_Y);
   }
 
-  // Table helper
+  // ── Inline table drawing ──────────────────────────────────────────────────
   function drawTable(title, cols, rows, startY) {
-    const PAD = 50;
+    const PAD    = LAYOUT.PAD;
     const tableW = IG_W - PAD * 2;
-    const colW = tableW / cols.length;
-    const ROW_H = 68;
-    const HEAD_H = 58;
+    const colW   = tableW / cols.length;
+    const ROW_H  = LAYOUT.ROW_H;
+    const HEAD_H = LAYOUT.HEAD_H;
 
     ctx.fillStyle = C.orange;
     ctx.font = 'bold 46px Oswald, Arial';
@@ -945,27 +993,18 @@ function drawStatsCard(logo) {
     return tableY + totalH;
   }
 
-  // Offense table — only players with stats
-  const offPlayers = players.filter(p => p.unit === 'offense');
-  const offWithStats = offPlayers.filter(p => p.td > 0 || p.catch > 0 || p.xp > 0);
-  const offRows = offWithStats.length
-    ? offWithStats.map(p => [p.name, p.td, p.catch, p.xp])
-    : [['—', '—', '—', '—']];
+  // Draw offense table starting just below the title area
+  const offStartY = 215;
+  const afterOff  = drawTable('OFENSA', ['Jugador','TD','CATCH','XP'], offRows, offStartY);
 
-  let nextY = drawTable('OFENSA', ['Jugador','TD','CATCH','XP'], offRows, 215);
+  // Defense table starts 90px below the end of offense table
+  drawTable('DEFENSA', ['Jugador','INT','FLAG','SACK','TD'], defRows, afterOff + 90);
 
-  // Defense table — only players with stats
-  const defPlayers = players.filter(p => p.unit === 'defense');
-  const defWithStats = defPlayers.filter(p => p.int > 0 || p.flag > 0 || p.sack > 0 || p.defTd > 0);
-  const defRows = defWithStats.length
-    ? defWithStats.map(p => [p.name, p.int, p.flag, p.sack, p.defTd])
-    : [['—', '—', '—', '—', '—']];
-
-  drawTable('DEFENSA', ['Jugador','INT','FLAG','SACK','TD'], defRows, nextY + 90);
-
-  drawFooter(ctx);
+  drawFooter(ctx, IG_W, h);
   return canvas;
 }
+
+// ─── Preview & Export ────────────────────────────────────────────────────────
 
 function showPreview(canvas, filename) {
   const dataUrl = canvas.toDataURL('image/png');
